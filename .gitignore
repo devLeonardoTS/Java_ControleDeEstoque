@@ -42,3 +42,9 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# SQLite database.
+.db
+
+# Application files folder.
+files_storage/

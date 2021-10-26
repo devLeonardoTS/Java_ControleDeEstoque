@@ -2,27 +2,43 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.beryx.jlink' version '2.24.4'
 }
 
-group 'com.devldots.controleestoque'
-version '1.0-SNAPSHOT'
+group 'com.devldots'
+version '1.0'
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+ext {
+    junitVersion = '5.7.1'
+}
+
+sourceCompatibility = '16'
+targetCompatibility = '16'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainModule = 'com.devldots.inventorymanagement'
+    mainClass = 'com.devldots.inventorymanagement.App'
 }
 
 javafx {
-    version = "16"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    version = '17.0.1'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+dependencies {
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
 
 test {
     useJUnitPlatform()
 }
-
-mainClassName = "com.devldots.controleestoque.App";

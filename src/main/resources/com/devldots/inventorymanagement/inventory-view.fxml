@@ -5,7 +5,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<AnchorPane id="AnchorPane" accessibleHelp="Controle de Estoque Simples" accessibleText="Controle de Estoque Simples" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.devldots.controleestoque.Controllers.EstoqueController">
+<AnchorPane id="AnchorPane"
+            accessibleHelp="Controle de Estoque Simples"
+            accessibleText="Controle de Estoque Simples"
+            minHeight="400.0" minWidth="600.0"
+            prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/11.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.devldots.inventorymanagement.Controllers.InventoryController"
+>
     <children>
         <HBox alignment="CENTER" layoutX="33.0" layoutY="26.0" AnchorPane.leftAnchor="33.0" AnchorPane.rightAnchor="33.0" AnchorPane.topAnchor="27.0">
             <children>

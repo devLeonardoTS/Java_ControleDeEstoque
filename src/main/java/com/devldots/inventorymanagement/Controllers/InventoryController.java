@@ -1,7 +1,7 @@
-package com.devldots.controleestoque.Controllers;
+package com.devldots.inventorymanagement.Controllers;
 
-import com.devldots.controleestoque.Models.Categoria;
-import com.devldots.controleestoque.Models.Produto;
+import com.devldots.inventorymanagement.Models.Category;
+import com.devldots.inventorymanagement.Models.Product;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -10,7 +10,7 @@ import javafx.scene.shape.Rectangle;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class EstoqueController {
+public class InventoryController {
 
     @FXML private Label lblProductName;
     @FXML private Label lblProductUnitaryPrice;
@@ -35,14 +35,14 @@ public class EstoqueController {
     @FXML private Button btnCancel;
     @FXML private Button btnLogout;
 
-    @FXML private TableView<Produto> tblProducts;
-    @FXML private TableColumn<Produto, Integer> tblColProductId;
-    @FXML private TableColumn<Produto, String> tblColProductName;
-    @FXML private TableColumn<Produto, BigDecimal> tblColProductUnitaryPrice;
-    @FXML private TableColumn<Produto, Integer> tblColProductQuantity;
-    @FXML private TableColumn<Produto, Categoria> tblColProductCategory;
-    @FXML private TableColumn<Produto, LocalDateTime> tblColProductRegistrationDate;
-    @FXML private TableColumn<Produto, LocalDateTime> tblColProductUpdateDate;
+    @FXML private TableView<Product> tblProducts;
+    @FXML private TableColumn<Product, Integer> tblColProductId;
+    @FXML private TableColumn<Product, String> tblColProductName;
+    @FXML private TableColumn<Product, BigDecimal> tblColProductUnitaryPrice;
+    @FXML private TableColumn<Product, Integer> tblColProductQuantity;
+    @FXML private TableColumn<Product, Category> tblColProductCategory;
+    @FXML private TableColumn<Product, LocalDateTime> tblColProductRegistrationDate;
+    @FXML private TableColumn<Product, LocalDateTime> tblColProductUpdateDate;
 
     @FXML public void quickLilTest() { }
 
