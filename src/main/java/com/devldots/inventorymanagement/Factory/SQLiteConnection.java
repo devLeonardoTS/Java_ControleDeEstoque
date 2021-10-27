@@ -22,15 +22,11 @@ public class SQLiteConnection implements IDbConnection {
 
         try
         {
-            connection = DriverManager.getConnection(
-                connectionString,
-                AppConfig.getDbUsername(),
-                AppConfig.getDbPassword()
-            );
+            connection = DriverManager.getConnection(connectionString);
 
             if (connection != null){
 
-                System.out.println("A connection has been established.");
+                System.out.println("A connection to the database has been established.");
 
                 if (!dbExists){
                     createDbTables(connection);

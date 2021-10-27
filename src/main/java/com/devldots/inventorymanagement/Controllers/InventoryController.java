@@ -1,16 +1,31 @@
 package com.devldots.inventorymanagement.Controllers;
 
+import com.devldots.inventorymanagement.Components.CustomComboBoxButtonCell;
+import com.devldots.inventorymanagement.Configs.AppConfig;
+import com.devldots.inventorymanagement.Factory.SQLiteConnection;
+import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
+import com.devldots.inventorymanagement.Services.GetProductCategoriesService;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class InventoryController {
+public class InventoryController implements IInventoryManipulationCallbacks {
+
+    @FXML private AnchorPane apMain;
 
     @FXML private Label lblProductName;
     @FXML private Label lblProductUnitaryPrice;
@@ -20,7 +35,7 @@ public class InventoryController {
     @FXML private TextField txtProductName;
     @FXML private TextField txtProductUnitaryPrice;
     @FXML private TextField txtProductQuantity;
-    @FXML private ComboBox cboProductCategory;
+    @FXML private ComboBox<Category> cboProductCategory;
 
     @FXML private Label lblChangeProductImg;
     @FXML private Rectangle clipProductImg;
@@ -44,18 +59,118 @@ public class InventoryController {
     @FXML private TableColumn<Product, LocalDateTime> tblColProductRegistrationDate;
     @FXML private TableColumn<Product, LocalDateTime> tblColProductUpdateDate;
 
-    @FXML public void quickLilTest() { }
+    private boolean isProductOperationsEnabled = false;
 
-    @FXML public void registerNewProduct() { }
+    @FXML private void initialize(){
 
-    @FXML public void editProduct() { }
+        this.cboProductCategory.setButtonCell(new CustomComboBoxButtonCell<>("Selecione uma categoria"));
 
-    @FXML public void removeProduct() { }
+        setOnPressEscapeHandler();
+        new GetProductCategoriesService(new SQLiteConnection(),this).execute();
 
-    @FXML public void cancelProductOperations() { }
+    }
 
-    @FXML public void productImgSelectionHandler() { }
+    @FXML private void quickLilTest(ActionEvent ev) {
+        // this.resetProductImg();
 
-    @FXML public void productSelectionHandler() { }
+    }
 
+    @FXML private void registerNewProduct(ActionEvent ev) {
+        this.enableProductOperation();
+    }
+
+    @FXML private void editProduct(ActionEvent ev) { }
+
+    @FXML private void removeProduct(ActionEvent ev) { }
+
+    @FXML private void cancelProductOperations(ActionEvent ev) {
+        this.resetControls();
+    }
+
+    @FXML private void productImgSelectionHandler(ActionEvent ev) { }
+
+    @FXML private void productSelectionHandler(ActionEvent ev) { }
+
+    private void resetControls(){
+        this.isProductOperationsEnabled = false;
+
+        this.btnRegister.setDisable(false);
+        this.btnRegister.setText("Novo Prod.");
+
+        this.btnUpdate.setDisable(true);
+        this.btnUpdate.setText("Atualizar");
+
+        this.btnCancel.setDisable(true);
+        this.btnDelete.setDisable(true);
+
+        this.txtProductName.setDisable(true);
+        this.txtProductName.clear();
+
+        this.txtProductUnitaryPrice.setDisable(true);
+        this.txtProductUnitaryPrice.clear();
+
+        this.txtProductQuantity.setDisable(true);
+        this.txtProductQuantity.clear();
+
+        this.cboProductCategory.setDisable(true);
+        this.cboProductCategory.getSelectionModel().clearSelection();
+        this.cboProductCategory.valueProperty().setValue(null);
+
+        this.tblProducts.setDisable(false);
+        this.tblProducts.getSelectionModel().clearSelection();
+
+        this.clipProductImg.setStroke(Paint.valueOf("#0000003f"));
+
+        this.lblChangeProductImg.setVisible(false);
+
+        this.resetProductImg();
+    };
+
+    private void resetProductImg(){
+        InputStream productImgInputStream = this.getClass().getClassLoader().getResourceAsStream(AppConfig.DEFAULT_PRODUCT_IMG_RESOURCE_PATH);
+        if (productImgInputStream != null){
+            Image defaultProductImg = new Image(productImgInputStream);
+            this.imgvProductImg.setClip(this.clipProductImg.getClip());
+            this.imgvProductImg.setImage(defaultProductImg);
+        }
+    }
+
+    private void setOnPressEscapeHandler(){
+        this.apMain.setOnKeyPressed(eh -> {
+            if (eh.getCode() == KeyCode.ESCAPE){
+                boolean isProductSelected = !this.tblProducts.getSelectionModel().isEmpty();
+
+                if (isProductSelected){
+                    this.resetControls();
+                }
+            }
+        });
+    }
+
+    private void enableProductOperation(){
+
+        this.isProductOperationsEnabled = true;
+
+        this.btnCancel.setDisable(false);
+        this.btnDelete.setDisable(true);
+
+        this.tblProducts.setDisable(true);
+
+        this.txtProductName.setDisable(false);
+        this.txtProductUnitaryPrice.setDisable(false);
+        this.txtProductQuantity.setDisable(false);
+        this.cboProductCategory.setDisable(false);
+
+        this.clipProductImg.setStroke(Color.BLUE);
+
+        this.lblChangeProductImg.setVisible(true);
+
+    }
+
+    @Override
+    public void handleCategoryList(List<Category> categories) {
+        for (Category ctgr : categories){
+            this.cboProductCategory.getItems().add(ctgr);
+        }
+    }
 }
