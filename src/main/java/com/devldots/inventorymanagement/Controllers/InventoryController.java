@@ -1,6 +1,8 @@
 package com.devldots.inventorymanagement.Controllers;
 
-import com.devldots.inventorymanagement.Components.CustomComboBoxButtonCell;
+import com.devldots.inventorymanagement.Components.CBoxBtnCellWithPromptText;
+import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
+import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
@@ -10,6 +12,7 @@ import com.devldots.inventorymanagement.Services.GetProductCategoriesService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -22,6 +25,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 public class InventoryController implements IInventoryManipulationCallbacks {
 
@@ -63,11 +67,16 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     @FXML private void initialize(){
 
-        this.cboProductCategory.setButtonCell(new CustomComboBoxButtonCell<>("Selecione uma categoria"));
+        customizeComponents();
 
         setOnPressEscapeHandler();
+
         new GetProductCategoriesService(new SQLiteConnection(),this).execute();
 
+        // Todo: Populate Products TableView with products data.
+        // 1. Prepare product retrieval callback in interface.
+        // 2. Prepare non-blocking product retrieval service.
+        // 3. Consume service filling products table view.
     }
 
     @FXML private void quickLilTest(ActionEvent ev) {
@@ -167,10 +176,41 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     }
 
+    private void customizeComponents(){
+
+        this.cboProductCategory.setButtonCell(new CBoxBtnCellWithPromptText("Selecione uma categoria"));
+
+        this.tblColProductId.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        this.tblColProductName.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        this.tblColProductUnitaryPrice.setCellValueFactory(new PropertyValueFactory<>("unitaryPrice"));
+        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(new Locale("pt", "BR"), false));
+
+        this.tblColProductCategory.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        this.tblColProductCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+        this.tblColProductRegistrationDate.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        this.tblColProductRegistrationDate.setCellFactory(col -> new TableCellWithDateFormat<>("dd/MM/yyyy HH:mm:ss"));
+
+        this.tblColProductUpdateDate.setCellValueFactory(new PropertyValueFactory<>("updatedAt"));
+        this.tblColProductUpdateDate.setCellFactory(col -> new TableCellWithDateFormat<>("dd/MM/yyyy HH:mm:ss"));
+
+    }
+
     @Override
     public void handleCategoryList(List<Category> categories) {
-        for (Category ctgr : categories){
-            this.cboProductCategory.getItems().add(ctgr);
+        List<Category> productCategories = this.cboProductCategory.getItems();
+
+        if (productCategories.isEmpty()) {
+            for (Category item : categories) {
+                productCategories.add(item);
+            }
         }
+    }
+
+    @Override
+    public void handleProductList(List<Product> products) {
+        // Todo: Insert products into Product TableView.
     }
 }

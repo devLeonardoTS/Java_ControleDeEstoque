@@ -4,12 +4,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.ListCell;
 
-public class CustomComboBoxButtonCell<T> extends ListCell<T> {
+public class CBoxBtnCellWithPromptText<T> extends ListCell<T> {
 
     // Named subclass of ListCell.
     private final StringProperty promptText = new SimpleStringProperty();
 
-    public CustomComboBoxButtonCell(String promptText){
+    public CBoxBtnCellWithPromptText(String promptText){
         this.promptText.addListener((obs, oldText, newText) -> {
             if (super.isEmpty() || super.getItem() == null){
                 super.setText(newText);
