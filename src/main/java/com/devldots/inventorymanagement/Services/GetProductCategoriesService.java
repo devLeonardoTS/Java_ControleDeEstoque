@@ -1,5 +1,6 @@
 package com.devldots.inventorymanagement.Services;
 
+import com.devldots.inventorymanagement.Constants.CategorySchema;
 import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
 import com.devldots.inventorymanagement.Factory.IDbConnection;
 import com.devldots.inventorymanagement.Models.Category;
@@ -26,16 +27,19 @@ public class GetProductCategoriesService {
 
     public void execute(){
         Thread thread = new Thread(() -> {
-            inventoryManipulationCallbacks.handleCategoryList(fetchCategoryList());
+            inventoryManipulationCallbacks.handleCategoryList(fetchCategories());
         });
         thread.start();
     }
 
-    private List<Category> fetchCategoryList(){
+    private List<Category> fetchCategories(){
 
         Connection connection = this.dbConnectable.getConnection();
 
-        String sql = "SELECT id_category, name FROM categories ORDER BY id_category;";
+        String sql = "SELECT" +
+                " " + CategorySchema.PK + ", " + CategorySchema.NAME +
+                " FROM " + CategorySchema.TABLE_ID +
+                " ORDER BY " + CategorySchema.PK + ";";
 
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
@@ -50,8 +54,8 @@ public class GetProductCategoriesService {
 
             while (resultSet.next()) {
                 Category category = new Category();
-                category.setId(resultSet.getInt("id_category"));
-                category.setName(resultSet.getString("name"));
+                category.setIdCategory(resultSet.getInt(CategorySchema.PK));
+                category.setName(resultSet.getString(CategorySchema.NAME));
 
                 this.getCategoryList().add(category);
             }

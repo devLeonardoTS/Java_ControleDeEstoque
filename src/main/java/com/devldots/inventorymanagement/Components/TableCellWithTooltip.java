@@ -9,6 +9,11 @@ public class TableCellWithTooltip<S, T> extends TableCell<S, T> {
     protected void updateItem(T item, boolean empty) {
         super.updateItem(item, empty);
 
+        if (item == null | empty){
+            super.setText(null);
+            return;
+        }
+
         String itemValue = String.valueOf(item);
 
         super.setText(itemValue);

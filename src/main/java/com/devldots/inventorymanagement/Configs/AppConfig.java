@@ -8,6 +8,8 @@ public final class AppConfig {
     public final static String FILES_DIR = Path.of(WORKING_DIR, "files_storage").toString();
     public final static String IMGS_DIR = Path.of(FILES_DIR, "Images").toString();
     public final static String PRODUCT_IMG_DIR = Path.of(IMGS_DIR, "Products").toString();
+    public final static String LOGS_DIR = Path.of(FILES_DIR, "Logs").toString();
+
 
     public final static String DEFAULT_PRODUCT_IMG_RESOURCE_PATH = "Assets/default_product_img.png";
     public final static String DEFAULT_COMPANY_LOGO_RESOURCE_PATH = "Assets/default_company_logo.png";
@@ -29,7 +31,9 @@ public final class AppConfig {
     // }
 
     public static void createFileDirectories() {
+
         new File(PRODUCT_IMG_DIR).mkdirs();
+        new File(LOGS_DIR).mkdirs();
     }
 
 }

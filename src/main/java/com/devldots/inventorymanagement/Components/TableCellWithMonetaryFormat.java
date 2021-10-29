@@ -13,9 +13,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.Tooltip;
 
 public class TableCellWithMonetaryFormat<S, T> extends TableCell<S, T> {
-    private final ObjectProperty<Locale> locale = new SimpleObjectProperty();
+    private final ObjectProperty<Locale> locale = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<DecimalFormat> moneyFormat = new SimpleObjectProperty();
+    private final ObjectProperty<DecimalFormat> moneyFormat = new SimpleObjectProperty<>();
 
     private final StringProperty monetarySymbol = new SimpleStringProperty();
 
@@ -75,8 +75,8 @@ public class TableCellWithMonetaryFormat<S, T> extends TableCell<S, T> {
         return monetarySymbolProperty().get();
     }
 
-    public final void setMonetarySymbol(String simbol){
-        monetarySymbolProperty().set(simbol);
+    public final void setMonetarySymbol(String symbol){
+        monetarySymbolProperty().set(symbol);
     }
 
     public final boolean getDisplayWithCurrency(){

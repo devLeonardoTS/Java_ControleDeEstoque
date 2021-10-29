@@ -1,28 +1,40 @@
 package com.devldots.inventorymanagement.Models;
 
+import javafx.beans.property.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Product {
 
-    private int id;
+    private int idProduct;
+    private int idCategory;
+
     private String name;
     private BigDecimal unitaryPrice;
     private int quantity;
-
-    private Category category;    // Mapping Attribute.
 
     private String imageUid;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public int getId() {
-        return id;
+    private Category category;    // Mapping Attribute.
+
+    public int getIdProduct() {
+        return idProduct;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdProduct(int idProduct) {
+        this.idProduct = idProduct;
+    }
+
+    public int getIdCategory() {
+        return idCategory;
+    }
+
+    public void setIdCategory(int idCategory) {
+        this.idCategory = idCategory;
     }
 
     public String getName() {
@@ -49,14 +61,6 @@ public class Product {
         this.quantity = quantity;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public String getImageUid() {
         return imageUid;
     }
@@ -81,4 +85,11 @@ public class Product {
         this.updatedAt = updatedAt;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 }
