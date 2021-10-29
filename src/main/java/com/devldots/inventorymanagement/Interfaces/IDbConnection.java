@@ -1,4 +1,4 @@
-package com.devldots.inventorymanagement.Factory;
+package com.devldots.inventorymanagement.Interfaces;
 
 import java.sql.Connection;
 import java.sql.SQLException;

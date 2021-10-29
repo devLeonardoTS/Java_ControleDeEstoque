@@ -1,15 +1,20 @@
 package com.devldots.inventorymanagement.Controllers;
 
-import com.devldots.inventorymanagement.Components.CustomComboBoxButtonCell;
+import com.devldots.inventorymanagement.Components.CBoxBtnCellWithPromptText;
+import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
+import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
+import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
+import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
+import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
-import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
-import com.devldots.inventorymanagement.Services.GetProductCategoriesService;
-import javafx.event.ActionEvent;
+import com.devldots.inventorymanagement.Services.CategoryService;
+import com.devldots.inventorymanagement.Services.ProductService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -18,12 +23,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collection;
+import java.util.Locale;
 
-public class InventoryController implements IInventoryManipulationCallbacks {
+public class InventoryController {
 
     @FXML private AnchorPane apMain;
 
@@ -63,33 +73,54 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     @FXML private void initialize(){
 
-        this.cboProductCategory.setButtonCell(new CustomComboBoxButtonCell<>("Selecione uma categoria"));
+        customizeComponents();
 
         setOnPressEscapeHandler();
-        new GetProductCategoriesService(new SQLiteConnection(),this).execute();
+
+        fillCategoryList();
+
+        fillProductTable();
 
     }
 
-    @FXML private void quickLilTest(ActionEvent ev) {
+    @FXML private void quickLilTest() {
         // this.resetProductImg();
 
     }
 
-    @FXML private void registerNewProduct(ActionEvent ev) {
+    @FXML private void registerNewProduct() {
+
+        this.resetControls();
         this.enableProductOperation();
+
     }
 
-    @FXML private void editProduct(ActionEvent ev) { }
+    @FXML private void editProduct() {
 
-    @FXML private void removeProduct(ActionEvent ev) { }
+        // this.enableProductOperation();
 
-    @FXML private void cancelProductOperations(ActionEvent ev) {
+    }
+
+    @FXML private void removeProduct() { }
+
+    @FXML private void cancelProductOperations() {
         this.resetControls();
     }
 
-    @FXML private void productImgSelectionHandler(ActionEvent ev) { }
+    @FXML private void productImgSelectionHandler() { }
 
-    @FXML private void productSelectionHandler(ActionEvent ev) { }
+    @FXML private void productSelectionHandler() {
+
+        Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
+
+        if (selectedProduct == null) { return; }
+
+        this.btnUpdate.setDisable(false);
+        this.btnDelete.setDisable(false);
+
+        this.fillControlsWithSelectedProduct(selectedProduct);
+
+    }
 
     private void resetControls(){
         this.isProductOperationsEnabled = false;
@@ -132,6 +163,7 @@ public class InventoryController implements IInventoryManipulationCallbacks {
             Image defaultProductImg = new Image(productImgInputStream);
             this.imgvProductImg.setClip(this.clipProductImg.getClip());
             this.imgvProductImg.setImage(defaultProductImg);
+            this.centralizeImage(this.imgvProductImg);
         }
     }
 
@@ -167,10 +199,112 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     }
 
-    @Override
-    public void handleCategoryList(List<Category> categories) {
-        for (Category ctgr : categories){
-            this.cboProductCategory.getItems().add(ctgr);
+    private void customizeComponents(){
+
+        this.cboProductCategory.setButtonCell(new CBoxBtnCellWithPromptText<>("Selecione uma categoria"));
+
+        this.tblColProductId.setCellValueFactory(new PropertyValueFactory<>("idProduct"));
+        this.tblColProductId.setCellFactory(col -> new TableCellWithTooltip<>());
+
+        this.tblColProductName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        this.tblColProductName.setCellFactory(col -> new TableCellWithTooltip<>());
+
+        this.tblColProductUnitaryPrice.setCellValueFactory(new PropertyValueFactory<>("unitaryPrice"));
+        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(new Locale("pt", "BR"), false));
+
+        this.tblColProductQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        this.tblColProductQuantity.setCellFactory(col -> new TableCellWithTooltip<>());
+
+        this.tblColProductCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+        this.tblColProductCategory.setCellFactory(col -> new TableCellWithTooltip<>());
+
+        this.tblColProductRegistrationDate.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        this.tblColProductRegistrationDate.setCellFactory(col -> new TableCellWithDateFormat<>("dd/MM/yyyy HH:mm:ss"));
+
+        this.tblColProductUpdateDate.setCellValueFactory(new PropertyValueFactory<>("updatedAt"));
+        this.tblColProductUpdateDate.setCellFactory(col -> new TableCellWithDateFormat<>("dd/MM/yyyy HH:mm:ss"));
+
+    }
+
+    private void fillControlsWithSelectedProduct(Product product){
+
+        this.txtProductName.setText(product.getName());
+
+        Locale locale = new Locale("pt", "BR");
+        DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(locale);
+        DecimalFormatSymbols localizedSymbols = new DecimalFormatSymbols(locale);
+        df.setDecimalFormatSymbols(localizedSymbols);
+        df.setMinimumIntegerDigits(1);
+        df.setMinimumFractionDigits(2);
+        this.txtProductUnitaryPrice.setText( df.format(product.getUnitaryPrice() ) );
+
+        this.txtProductQuantity.setText(Integer.toString(product.getQuantity()));
+
+        this.cboProductCategory.getSelectionModel().select(product.getCategory());
+
+        String productImgPath = Path.of(AppConfig.PRODUCT_IMG_DIR, product.getImageUid()).toString();
+        File imgFile = new File(productImgPath);
+        boolean imgFileExists = imgFile.exists();
+        if (!imgFileExists) {
+            this.resetProductImg();
+            return;
+        }
+        Image productImg = null;
+        try {
+            productImg = new Image(productImgPath);
+
+            this.imgvProductImg.setClip(this.clipProductImg.getClip());
+            this.imgvProductImg.setImage(productImg);
+            this.centralizeImage(this.imgvProductImg);
+        } catch (NullPointerException | IllegalArgumentException ex){
+            this.resetProductImg();
+        }
+
+    }
+
+    private void centralizeImage(ImageView imageView){
+        //  This algorithm is proposed in this SO Post: https://stackoverflow.com/questions/32781362/centering-an-image-in-an-imageview [ Last visit @ 2021/10/29 ]
+        Image img = imageView.getImage();
+        if (img != null){
+            double w = 0;
+            double h = 0;
+
+            double ratioX = imageView.getFitWidth() / img.getWidth();
+            double ratioY = imageView.getFitHeight() / img.getHeight();
+
+            double reducCoeff = 0;
+            if (ratioX >= ratioY){
+                reducCoeff = ratioY;
+            } else {
+                reducCoeff = ratioX;
+            }
+
+            w = img.getWidth() * reducCoeff;
+            h = img.getHeight() * reducCoeff;
+
+            imageView.setX((imageView.getFitWidth() - w) / 2);
+            imageView.setY((imageView.getFitHeight() - h) / 2);
         }
     }
+
+    public void fillCategoryList(){
+        new Thread(() -> {
+            Collection<Category> categoryList = this.cboProductCategory.getItems();
+            categoryList.addAll(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategories());
+        }).start();
+    }
+
+    public void fillProductTable(){
+        new Thread(() -> {
+            Collection<Product> productTable = this.tblProducts.getItems();
+
+            Collection<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
+            for(Product product : products){
+                product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
+                productTable.add(product);
+            }
+        }).start();
+    }
+
+
 }

@@ -1,15 +1,21 @@
 package com.devldots.inventorymanagement.Models;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class Category {
-    private int id;
+
+    private int idCategory;
     private String name;
 
-    public int getId() {
-        return id;
+    public int getIdCategory() {
+        return idCategory;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdCategory(int idCategory) {
+        this.idCategory = idCategory;
     }
 
     public String getName() {
@@ -24,4 +30,5 @@ public class Category {
     public String toString(){
         return this.getName();
     }
+
 }

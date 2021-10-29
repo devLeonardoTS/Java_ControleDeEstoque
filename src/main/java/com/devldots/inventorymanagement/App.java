@@ -1,7 +1,7 @@
 package com.devldots.inventorymanagement;
 
 import com.devldots.inventorymanagement.Configs.AppConfig;
-import com.devldots.inventorymanagement.Factory.IDbConnection;
+import com.devldots.inventorymanagement.Interfaces.IDbConnection;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
