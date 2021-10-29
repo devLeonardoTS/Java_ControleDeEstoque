@@ -90,8 +90,20 @@ public class InventoryController {
 
     @FXML private void registerNewProduct() {
 
-        this.resetControls();
-        this.enableProductOperation();
+        String btnValue = this.btnRegister.getText();
+
+        if (btnValue.equals("Novo Prod.")) {
+            this.resetControls();
+            this.btnRegister.setText("Cadastrar");
+            this.enableProductOperation();
+            return;
+        }
+
+        if (btnValue.equals("Cadastrar")){
+            // Todo: Register product into the database.
+        }
+
+
 
     }
 

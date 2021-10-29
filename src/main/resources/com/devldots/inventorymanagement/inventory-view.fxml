@@ -19,11 +19,11 @@
                         <TextField id="txtProductUnitaryPrice" fx:id="txtProductUnitaryPrice" disable="true" layoutX="51.0" layoutY="42.0" promptText="1.000,00" />
                         <TextField id="txtProductQuantity" fx:id="txtProductQuantity" disable="true" layoutX="51.0" layoutY="83.0" promptText="10" />
                         <ComboBox id="cboProductCategory" fx:id="cboProductCategory" disable="true" layoutX="51.0" layoutY="121.0" prefHeight="25.0" prefWidth="149.0" promptText="Selecione a categoria" />
-                        <Button id="btnRegister" fx:id="btnRegister" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#registerNewProduct" text="Novo Prod." />
-                        <Button id="btnUpdate" fx:id="btnUpdate" disable="true" layoutX="396.0" layoutY="71.0" mnemonicParsing="false" onAction="#editProduct" text="Atualizar" />
-                        <Button id="btnCancel" fx:id="btnCancel" disable="true" layoutX="477.0" layoutY="71.0" mnemonicParsing="false" onAction="#cancelProductOperations" text="Cancelar" />
-                        <Button id="btnDelete" fx:id="btnDelete" disable="true" layoutX="400.0" layoutY="127.0" mnemonicParsing="false" text="Deletar" />
-                        <Button id="btnLogout" fx:id="btnLogout" layoutX="481.0" layoutY="127.0" mnemonicParsing="false" onAction="#quickLilTest" text="Logout" />
+                        <Button id="btnRegister" fx:id="btnRegister" layoutX="390.0" layoutY="15.0" minHeight="25.0" minWidth="76.0" mnemonicParsing="false" onAction="#registerNewProduct" text="Novo Prod." />
+                        <Button id="btnUpdate" fx:id="btnUpdate" disable="true" layoutX="396.0" layoutY="71.0" minHeight="25.0" minWidth="63.0" mnemonicParsing="false" onAction="#editProduct" text="Atualizar" />
+                        <Button id="btnCancel" fx:id="btnCancel" disable="true" layoutX="477.0" layoutY="71.0" minHeight="25.0" minWidth="62.0" mnemonicParsing="false" onAction="#cancelProductOperations" text="Cancelar" />
+                        <Button id="btnDelete" fx:id="btnDelete" disable="true" layoutX="400.0" layoutY="127.0" minHeight="25.0" minWidth="55.0" mnemonicParsing="false" text="Deletar" />
+                        <Button id="btnLogout" fx:id="btnLogout" layoutX="481.0" layoutY="127.0" minHeight="25.0" minWidth="54.0" mnemonicParsing="false" onAction="#quickLilTest" text="Logout" />
                         <ImageView id="imgvProductImg" fx:id="imgvProductImg" fitHeight="150.0" fitWidth="150.0" layoutX="221.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@/Assets/default_product_img.png" />

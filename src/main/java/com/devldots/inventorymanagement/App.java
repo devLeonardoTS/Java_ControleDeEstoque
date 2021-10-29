@@ -19,7 +19,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
 
         AppConfig.createFileDirectories();
-        // checkDbConnection(new SQLiteConnection());
+        createDbConnection(new SQLiteConnection());
         // checkDbProductsTable();
 
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("inventory-view.fxml"));
@@ -30,7 +30,7 @@ public class App extends Application {
 
     }
 
-    private void checkDbConnection(IDbConnection dbConnectable){
+    private void createDbConnection(IDbConnection dbConnectable){
 
         Connection connection = dbConnectable.getConnection();
 
