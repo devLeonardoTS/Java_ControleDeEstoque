@@ -3,6 +3,7 @@ package com.devldots.inventorymanagement.Factory;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.Constants.CategorySchema;
 import com.devldots.inventorymanagement.Constants.ProductSchema;
+import com.devldots.inventorymanagement.Interfaces.IDbConnection;
 import com.devldots.inventorymanagement.Utils.AppLogger;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

@@ -1,8 +1,8 @@
-package com.devldots.inventorymanagement.Services;
+package com.devldots.inventorymanagement.DataAccessObjects;
 
 import com.devldots.inventorymanagement.Constants.ProductSchema;
-import com.devldots.inventorymanagement.Factory.IDbConnection;
-import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
+import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
+import com.devldots.inventorymanagement.Interfaces.IDbConnection;
 import com.devldots.inventorymanagement.Models.Product;
 
 import java.sql.Connection;
@@ -12,31 +12,31 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-public class GetProductsService {
+public class ProductDAO implements IDataAccessObject<Product> {
 
-    private IDbConnection dbConnectable;
-    private IInventoryManipulationCallbacks inventoryManipulationCallbacks;
+    IDbConnection dbConnectable;
 
-    private List<Product> products;
-
-    public GetProductsService(IDbConnection dbConnectable, IInventoryManipulationCallbacks inventoryManipulationCallbacks){
+    public ProductDAO(IDbConnection dbConnectable){
         this.dbConnectable = dbConnectable;
-        this.inventoryManipulationCallbacks = inventoryManipulationCallbacks;
     }
 
-    public void execute(){
-        Thread thread = new Thread(() -> {
-            inventoryManipulationCallbacks.handleProductList(this.fetchProducts());
-        });
-        thread.start();
+    @Override
+    public boolean save(Product object) {
+        // Todo: New product registration.
+        return false;
     }
 
-    public List<Product> fetchProducts(){
+    @Override
+    public Product get(Object id) throws NullPointerException, IllegalArgumentException {
+        return null;
+    }
+
+    @Override
+    public Collection<Product> getAll() {
 
         Connection connection = this.dbConnectable.getConnection();
-        this.setProducts(new ArrayList());
 
         String sql = "SELECT " +
                 ProductSchema.PK + ", " + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME +
@@ -49,16 +49,19 @@ public class GetProductsService {
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
 
+        Collection<Product> products = new ArrayList<>();
+
         try {
 
             pstmt = connection.prepareStatement(sql);
             resultSet = pstmt.executeQuery();
 
             boolean isProductListEmpty = !resultSet.isBeforeFirst();
-            if (isProductListEmpty) { return this.getProducts(); }
+            if (isProductListEmpty) { return products; }
 
             while (resultSet.next()){
                 Product product = new Product();
+
                 product.setIdProduct(resultSet.getInt(ProductSchema.PK));
                 product.setIdCategory(resultSet.getInt(ProductSchema.FK_CATEGORY));
                 product.setName(resultSet.getString(ProductSchema.NAME));
@@ -68,7 +71,7 @@ public class GetProductsService {
                 product.setCreatedAt(LocalDateTime.parse(resultSet.getString(ProductSchema.CREATED_AT)));
                 product.setUpdatedAt(LocalDateTime.parse(resultSet.getString(ProductSchema.UPDATED_AT)));
 
-                this.getProducts().add(product);
+                products.add(product);
             }
 
         } catch (SQLException | DateTimeParseException ex){
@@ -89,31 +92,17 @@ public class GetProductsService {
 
         }
 
-        return this.getProducts();
-
-    }
-
-    public IDbConnection getDbConnectable() {
-        return dbConnectable;
-    }
-
-    public void setDbConnectable(IDbConnection dbConnectable) {
-        this.dbConnectable = dbConnectable;
-    }
-
-    public IInventoryManipulationCallbacks getInventoryManipulationCallbacks() {
-        return inventoryManipulationCallbacks;
-    }
-
-    public void setInventoryManipulationCallbacks(IInventoryManipulationCallbacks inventoryManipulationCallbacks) {
-        this.inventoryManipulationCallbacks = inventoryManipulationCallbacks;
-    }
-
-    public List<Product> getProducts() {
         return products;
+
     }
 
-    public void setProducts(List<Product> products) {
-        this.products = products;
+    @Override
+    public Product update(Product object) throws NullPointerException {
+        return null;
+    }
+
+    @Override
+    public boolean delete(Object id) throws IllegalArgumentException {
+        return false;
     }
 }

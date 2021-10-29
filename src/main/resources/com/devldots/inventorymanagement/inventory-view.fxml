@@ -16,7 +16,7 @@
                         <Label id="lblProductQuantity" fx:id="lblProductQuantity" layoutX="20.0" layoutY="87.0" text="Qtd." />
                         <Label id="lblProductCategory" fx:id="lblProductCategory" layoutX="22.0" layoutY="125.0" text="Cat." />
                         <TextField id="txtProductName" fx:id="txtProductName" disable="true" layoutX="51.0" layoutY="6.0" promptText="Nome do produto" />
-                        <TextField id="txtProductUnitaryPrice" fx:id="txtProductUnitaryPrice" disable="true" layoutX="51.0" layoutY="42.0" promptText="R$: 1.000,00" />
+                        <TextField id="txtProductUnitaryPrice" fx:id="txtProductUnitaryPrice" disable="true" layoutX="51.0" layoutY="42.0" promptText="1.000,00" />
                         <TextField id="txtProductQuantity" fx:id="txtProductQuantity" disable="true" layoutX="51.0" layoutY="83.0" promptText="10" />
                         <ComboBox id="cboProductCategory" fx:id="cboProductCategory" disable="true" layoutX="51.0" layoutY="121.0" prefHeight="25.0" prefWidth="149.0" promptText="Selecione a categoria" />
                         <Button id="btnRegister" fx:id="btnRegister" layoutX="390.0" layoutY="15.0" mnemonicParsing="false" onAction="#registerNewProduct" text="Novo Prod." />

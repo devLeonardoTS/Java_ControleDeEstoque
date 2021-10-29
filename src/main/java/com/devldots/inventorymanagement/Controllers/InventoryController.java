@@ -5,14 +5,13 @@ import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
+import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
+import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
-import com.devldots.inventorymanagement.Interfaces.IInventoryManipulationCallbacks;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
-import com.devldots.inventorymanagement.Services.GetCategoryService;
-import com.devldots.inventorymanagement.Services.GetProductCategoriesService;
-import com.devldots.inventorymanagement.Services.GetProductsService;
-import javafx.event.ActionEvent;
+import com.devldots.inventorymanagement.Services.CategoryService;
+import com.devldots.inventorymanagement.Services.ProductService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -31,10 +30,10 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
-public class InventoryController implements IInventoryManipulationCallbacks {
+public class InventoryController {
 
     @FXML private AnchorPane apMain;
 
@@ -78,26 +77,29 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
         setOnPressEscapeHandler();
 
-        new GetProductCategoriesService(new SQLiteConnection(),this).execute();
+        fillCategoryList();
 
-        // Todo: Populate Products TableView with products data.
-        // 1. [X] Prepare product retrieval callback in interface.
-        // 2. [ ] Prepare non-blocking product retrieval service.
-        // 3. [ ] Consume service filling products table view.
+        fillProductTable();
+
     }
 
     @FXML private void quickLilTest() {
         // this.resetProductImg();
 
-        new GetProductsService(new SQLiteConnection(), this).execute();
-
     }
 
     @FXML private void registerNewProduct() {
+
+        this.resetControls();
         this.enableProductOperation();
+
     }
 
-    @FXML private void editProduct() { }
+    @FXML private void editProduct() {
+
+        // this.enableProductOperation();
+
+    }
 
     @FXML private void removeProduct() { }
 
@@ -109,8 +111,6 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     @FXML private void productSelectionHandler() {
 
-        // Todo: Rework the product selection handler.
-
         Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
 
         if (selectedProduct == null) { return; }
@@ -118,7 +118,7 @@ public class InventoryController implements IInventoryManipulationCallbacks {
         this.btnUpdate.setDisable(false);
         this.btnDelete.setDisable(false);
 
-        this.fillControls(selectedProduct);
+        this.fillControlsWithSelectedProduct(selectedProduct);
 
     }
 
@@ -163,7 +163,7 @@ public class InventoryController implements IInventoryManipulationCallbacks {
             Image defaultProductImg = new Image(productImgInputStream);
             this.imgvProductImg.setClip(this.clipProductImg.getClip());
             this.imgvProductImg.setImage(defaultProductImg);
-            this.centerImage(this.imgvProductImg);
+            this.centralizeImage(this.imgvProductImg);
         }
     }
 
@@ -226,7 +226,7 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
     }
 
-    private void fillControls(Product product){
+    private void fillControlsWithSelectedProduct(Product product){
 
         this.txtProductName.setText(product.getName());
 
@@ -255,15 +255,15 @@ public class InventoryController implements IInventoryManipulationCallbacks {
 
             this.imgvProductImg.setClip(this.clipProductImg.getClip());
             this.imgvProductImg.setImage(productImg);
-            this.centerImage(this.imgvProductImg);
+            this.centralizeImage(this.imgvProductImg);
         } catch (NullPointerException | IllegalArgumentException ex){
             this.resetProductImg();
         }
 
     }
 
-    private void centerImage(ImageView imageView){
-        //  This algorithm is proposed in this SO Post: https://stackoverflow.com/questions/32781362/centering-an-image-in-an-imageview [ 2021/10/29 ]
+    private void centralizeImage(ImageView imageView){
+        //  This algorithm is proposed in this SO Post: https://stackoverflow.com/questions/32781362/centering-an-image-in-an-imageview [ Last visit @ 2021/10/29 ]
         Image img = imageView.getImage();
         if (img != null){
             double w = 0;
@@ -287,36 +287,24 @@ public class InventoryController implements IInventoryManipulationCallbacks {
         }
     }
 
-    @Override
-    public void handleCategoryList(List<Category> categories) {
-        List<Category> productCategories = this.cboProductCategory.getItems();
-
-        if (productCategories.isEmpty()) {
-            productCategories.addAll(categories);
-        }
+    public void fillCategoryList(){
+        new Thread(() -> {
+            Collection<Category> categoryList = this.cboProductCategory.getItems();
+            categoryList.addAll(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategories());
+        }).start();
     }
 
-    @Override
-    public void handleProductList(List<Product> products) {
-        // Todo: Insert products into Product TableView.
-        // Todo: Rework all the services - Can't really make functions that wont block the UI thread. I need to call new threads on demand.
+    public void fillProductTable(){
         new Thread(() -> {
-            List<Product> productTableList = this.tblProducts.getItems();
-            if (productTableList.isEmpty()) {
-                // productTableList.addAll(products);
-                for (Product item : products) {
-//                Category cat = this.cboProductCategory.getItems().stream().filter(c -> c.getIdCategory() == item.getIdCategory()).findFirst().get();
-//                item.setCategory(cat);
+            Collection<Product> productTable = this.tblProducts.getItems();
 
-                    Category cat = new Category();
-
-                    Category nc = new GetCategoryService(new SQLiteConnection(), cat, item.getIdCategory()).fetchCategory();
-
-                    item.setCategory(nc);
-                    productTableList.add(item);
-                }
+            Collection<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
+            for(Product product : products){
+                product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
+                productTable.add(product);
             }
         }).start();
-
     }
+
+
 }
