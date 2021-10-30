@@ -1,10 +1,10 @@
 package com.devldots.inventorymanagement.Services;
 
-import com.devldots.inventorymanagement.DataTransferObjects.CategoryDTO;
 import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Models.Category;
 
 import java.util.Collection;
+import java.util.List;
 
 public class CategoryService {
 
@@ -14,7 +14,8 @@ public class CategoryService {
         this.categoryDao = categoryDao;
     }
 
-    public boolean saveCategory(Category category){
+    public boolean saveCategory(Category validatedCategory){
+        // Todo: Complete category validation to receive a validatedCategory and save it to the DB.
         return false;
     }
 
@@ -22,7 +23,7 @@ public class CategoryService {
         return categoryDao.get(id);
     }
 
-    public Collection<Category> getCategories(){
+    public List<Category> getCategories(){
         return categoryDao.getAll();
     }
 
@@ -33,9 +34,5 @@ public class CategoryService {
     public boolean deleteCategory(int id) {
         return false;
     }
-
-    private void validate(Category category){
-        // Todo: Category validation.
-    };
 
 }

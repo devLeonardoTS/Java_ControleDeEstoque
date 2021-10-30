@@ -4,6 +4,7 @@ import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Models.Product;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ProductService {
 
@@ -13,8 +14,8 @@ public class ProductService {
         this.productDao = productDao;
     }
 
-    public boolean saveProduct(Product product) {
-        // Todo: Validate the product before interacting with ProductDAO.
+    public boolean saveProduct(Product validatedProduct) {
+        // Todo: Complete product validation to receive a validatedProduct and save it to the DB.
         return false;
     }
 
@@ -22,7 +23,7 @@ public class ProductService {
         return null;
     }
 
-    public Collection<Product> getProducts() {
+    public List<Product> getProducts() {
         return productDao.getAll();
     }
 
@@ -34,7 +35,4 @@ public class ProductService {
         return false;
     }
 
-    private void validate(Product product){
-        // Todo: Product data validation logic.
-    }
 }

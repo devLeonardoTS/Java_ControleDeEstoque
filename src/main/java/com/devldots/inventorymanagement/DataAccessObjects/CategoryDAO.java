@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class CategoryDAO implements IDataAccessObject<Category> {
 
@@ -81,7 +81,7 @@ public class CategoryDAO implements IDataAccessObject<Category> {
     }
 
     @Override
-    public Collection<Category> getAll() {
+    public List<Category> getAll() {
 
         Connection connection = this.dbConnectable.getConnection();
 
@@ -93,7 +93,7 @@ public class CategoryDAO implements IDataAccessObject<Category> {
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
 
-        Collection<Category> categories = new ArrayList<>();
+        List<Category> categories = new ArrayList<>();
 
         try {
 

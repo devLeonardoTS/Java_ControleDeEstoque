@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class ProductDAO implements IDataAccessObject<Product> {
 
@@ -24,7 +24,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
     @Override
     public boolean save(Product object) {
-        // Todo: New product registration.
+        // Todo: New product registration SQL.
         return false;
     }
 
@@ -34,7 +34,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
     }
 
     @Override
-    public Collection<Product> getAll() {
+    public List<Product> getAll() {
 
         Connection connection = this.dbConnectable.getConnection();
 
@@ -49,7 +49,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
 
-        Collection<Product> products = new ArrayList<>();
+        List<Product> products = new ArrayList<>();
 
         try {
 

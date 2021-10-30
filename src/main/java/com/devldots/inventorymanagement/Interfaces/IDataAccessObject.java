@@ -1,6 +1,6 @@
 package com.devldots.inventorymanagement.Interfaces;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface IDataAccessObject<T> {
 
@@ -8,7 +8,7 @@ public interface IDataAccessObject<T> {
 
     T get(Object id) throws NullPointerException, IllegalArgumentException;
 
-    Collection<T> getAll();
+    List<T> getAll();
 
     T update(T object) throws NullPointerException;
 

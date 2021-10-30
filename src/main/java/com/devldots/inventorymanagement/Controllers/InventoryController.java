@@ -1,5 +1,6 @@
 package com.devldots.inventorymanagement.Controllers;
 
+import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
 import com.devldots.inventorymanagement.Components.CBoxBtnCellWithPromptText;
 import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
@@ -7,11 +8,13 @@ import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
 import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
+import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
 import com.devldots.inventorymanagement.Services.CategoryService;
 import com.devldots.inventorymanagement.Services.ProductService;
+import com.devldots.inventorymanagement.Utils.ProductValidation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -90,7 +93,7 @@ public class InventoryController {
 
     @FXML private void registerNewProduct() {
 
-        String btnValue = this.btnRegister.getText();
+        String btnValue = this.btnRegister.getText() != null ? this.btnRegister.getText() : "" ;
 
         if (btnValue.equals("Novo Prod.")) {
             this.resetControls();
@@ -100,7 +103,14 @@ public class InventoryController {
         }
 
         if (btnValue.equals("Cadastrar")){
-            // Todo: Register product into the database.
+            // Todo: Set up the logic for a successful insertion of a product into the database.
+
+            // 1. [ ] - Validate the user input for the Product.
+            // 2. [ ] - Call the service that will insert the newly validated Product into the DB.
+            // 3. [ ] - Check if the product shows up in the Product Table.
+
+            Product validProduct = this.validateProductInput(new ProductValidation());
+
         }
 
 
@@ -167,7 +177,7 @@ public class InventoryController {
         this.lblChangeProductImg.setVisible(false);
 
         this.resetProductImg();
-    };
+    }
 
     private void resetProductImg(){
         InputStream productImgInputStream = this.getClass().getClassLoader().getResourceAsStream(AppConfig.DEFAULT_PRODUCT_IMG_RESOURCE_PATH);
@@ -318,5 +328,32 @@ public class InventoryController {
         }).start();
     }
 
+    public Product validateProductInput(AbstractDataEntryValidation<ProductDTO, Product> productValidator) {
+
+        String productName = this.txtProductName != null ? this.txtProductName.getText() : "";
+        String productUnitaryPrice = this.txtProductUnitaryPrice != null ? this.txtProductUnitaryPrice.getText() : "";
+        String productQuantity = this.txtProductQuantity != null ? this.txtProductQuantity.getText() : "";
+        String selectedCategory = this.cboProductCategory.getSelectionModel().getSelectedItem() != null ? Integer.toString(this.cboProductCategory.getSelectionModel().getSelectedItem().getIdCategory()) : "";
+        String productImageUid = this.imgvProductImg.getImage().getUrl() != null ? this.imgvProductImg.getImage().getUrl() : "";
+
+        ProductDTO productInput = new ProductDTO();
+
+        productInput.setName(productName);
+        productInput.setUnitaryPrice(productUnitaryPrice);
+        productInput.setQuantity(productQuantity);
+        productInput.setIdCategory(selectedCategory);
+        productInput.setImageUid(productImageUid);
+
+        boolean isProductValid = productValidator.validate(productInput);
+
+        if (!isProductValid) {
+            productValidator.getErrorList();
+            return null;
+        }
+
+        System.out.println("All green, product is valid and safe to be stored in the database.");
+        return null;
+
+    }
 
 }
