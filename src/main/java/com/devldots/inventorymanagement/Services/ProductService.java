@@ -3,7 +3,6 @@ package com.devldots.inventorymanagement.Services;
 import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Models.Product;
 
-import java.util.Collection;
 import java.util.List;
 
 public class ProductService {
@@ -15,7 +14,7 @@ public class ProductService {
     }
 
     public boolean saveProduct(Product validatedProduct) {
-        // Todo: Complete product validation to receive a validatedProduct and save it to the DB.
+        this.productDao.save(validatedProduct);
         return false;
     }
 

@@ -23,8 +23,15 @@ public class ProductDAO implements IDataAccessObject<Product> {
     }
 
     @Override
-    public boolean save(Product object) {
+    public boolean save(Product validatedProduct) {
         // Todo: New product registration SQL.
+
+        System.out.println("CatID: " + validatedProduct.getIdCategory());
+        System.out.println("Name: " + validatedProduct.getName());
+        System.out.println("Price: " + validatedProduct.getUnitaryPrice());
+        System.out.println("Qtt: " + validatedProduct.getQuantity());
+        System.out.println("Photo: " + validatedProduct.getImageUid());
+
         return false;
     }
 

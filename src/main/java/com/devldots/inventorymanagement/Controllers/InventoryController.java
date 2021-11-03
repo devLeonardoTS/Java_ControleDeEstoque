@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -110,6 +111,11 @@ public class InventoryController {
             // 3. [ ] - Check if the product shows up in the Product Table.
 
             Product validProduct = this.validateProductInput(new ProductValidation());
+            if (validProduct != null){
+                new ProductService(new ProductDAO(new SQLiteConnection())).saveProduct(validProduct);
+                this.tblProducts.getItems().clear();
+                this.fillProductTable();
+            }
 
         }
 
@@ -347,12 +353,18 @@ public class InventoryController {
         boolean isProductValid = productValidator.validate(productInput);
 
         if (!isProductValid) {
-            productValidator.getErrorList();
+            ArrayList<String> errorList = (ArrayList<String>) productValidator.getErrorList();
+            for (String error : errorList){
+                System.out.println("InvController: " + error);
+            }
+
             return null;
         }
 
+        Product validatedProduct = productValidator.getValidated();
+
         System.out.println("All green, product is valid and safe to be stored in the database.");
-        return null;
+        return validatedProduct;
 
     }
 
