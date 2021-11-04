@@ -1,6 +1,5 @@
 package com.devldots.inventorymanagement.Controllers;
 
-import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
 import com.devldots.inventorymanagement.Components.CBoxBtnCellWithPromptText;
 import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
@@ -25,6 +24,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.InputStream;
@@ -33,8 +33,8 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 public class InventoryController {
@@ -104,18 +104,30 @@ public class InventoryController {
         }
 
         if (btnValue.equals("Cadastrar")){
-            // Todo: Set up the logic for a successful insertion of a product into the database.
+            // Todo: Improve the UX.
 
-            // 1. [ ] - Validate the user input for the Product.
-            // 2. [ ] - Call the service that will insert the newly validated Product into the DB.
-            // 3. [ ] - Check if the product shows up in the Product Table.
+            // 1. [ ] - Show product data to user and ask confirmation before saving the product.
+            // 2. [ ] - Display any input error that prevents the product to be saved.
+            // 3. [ ] - Make the the operation non-blocking.
 
-            Product validProduct = this.validateProductInput(new ProductValidation());
-            if (validProduct != null){
-                new ProductService(new ProductDAO(new SQLiteConnection())).saveProduct(validProduct);
-                this.tblProducts.getItems().clear();
-                this.fillProductTable();
+
+            ProductDTO productInput = this.getProductInputData();
+
+            ProductService productService = new ProductService(new ProductDAO(new SQLiteConnection()));
+            boolean isProductStoredSuccessfully = productService.saveProduct(productInput, new ProductValidation());
+
+            if (!isProductStoredSuccessfully){
+                List<String> errorList = productService.getErrorList();
+                for (String error : errorList){
+                    System.out.println("InvCtrl: " + error);
+                }
+                return;
             }
+
+            System.out.println("Product successfully registered.");
+            this.tblProducts.getItems().clear();
+            this.fillProductTable();
+            this.resetControls();
 
         }
 
@@ -135,7 +147,27 @@ public class InventoryController {
         this.resetControls();
     }
 
-    @FXML private void productImgSelectionHandler() { }
+    @FXML private void productImgSelectionHandler() {
+
+        if (this.isProductOperationsEnabled){
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Selecione a foto do produto");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+
+            File selectedFile = fileChooser.showOpenDialog(null);
+
+            if (selectedFile != null){
+                this.lblChangeProductImg.setVisible(false);
+
+                Image selectedProductImage = new Image(selectedFile.getPath());
+
+                this.imgvProductImg.setClip(this.clipProductImg.getClip());
+                this.imgvProductImg.setImage(selectedProductImage);
+                this.centralizeImage(this.imgvProductImg);
+            }
+        }
+
+    }
 
     @FXML private void productSelectionHandler() {
 
@@ -334,7 +366,7 @@ public class InventoryController {
         }).start();
     }
 
-    public Product validateProductInput(AbstractDataEntryValidation<ProductDTO, Product> productValidator) {
+    public ProductDTO getProductInputData(){
 
         String productName = this.txtProductName != null ? this.txtProductName.getText() : "";
         String productUnitaryPrice = this.txtProductUnitaryPrice != null ? this.txtProductUnitaryPrice.getText() : "";
@@ -348,23 +380,9 @@ public class InventoryController {
         productInput.setUnitaryPrice(productUnitaryPrice);
         productInput.setQuantity(productQuantity);
         productInput.setIdCategory(selectedCategory);
-        productInput.setImageUid(productImageUid);
+        productInput.setImagePath(productImageUid);
 
-        boolean isProductValid = productValidator.validate(productInput);
-
-        if (!isProductValid) {
-            ArrayList<String> errorList = (ArrayList<String>) productValidator.getErrorList();
-            for (String error : errorList){
-                System.out.println("InvController: " + error);
-            }
-
-            return null;
-        }
-
-        Product validatedProduct = productValidator.getValidated();
-
-        System.out.println("All green, product is valid and safe to be stored in the database.");
-        return validatedProduct;
+        return productInput;
 
     }
 

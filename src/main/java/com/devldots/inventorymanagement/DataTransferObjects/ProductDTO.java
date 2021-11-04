@@ -7,7 +7,7 @@ public class ProductDTO {
     private String name;
     private String unitaryPrice;
     private String quantity;
-    private String imageUid;
+    private String imagePath;
     private String createdAt;
     private String updatedAt;
 
@@ -17,7 +17,7 @@ public class ProductDTO {
         this.name = "";
         this.unitaryPrice = "";
         this.quantity = "";
-        this.imageUid = "";
+        this.imagePath = "";
         this.createdAt = "";
         this.updatedAt = "";
     }
@@ -62,12 +62,12 @@ public class ProductDTO {
         this.quantity = quantity;
     }
 
-    public String getImageUid() {
-        return imageUid;
+    public String getImagePath() {
+        return imagePath;
     }
 
-    public void setImageUid(String imageUid) {
-        this.imageUid = imageUid;
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public String getCreatedAt() {

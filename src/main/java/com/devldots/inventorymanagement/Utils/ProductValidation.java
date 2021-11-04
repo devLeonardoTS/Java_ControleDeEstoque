@@ -1,10 +1,7 @@
 package com.devldots.inventorymanagement.Utils;
 
 import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
-import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
-import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
-import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
 
 import java.math.BigDecimal;
@@ -18,7 +15,6 @@ import java.util.Locale;
 
 public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, Product> {
 
-
     public ProductValidation(List<String> errorList) {
         super(errorList);
     }
@@ -29,9 +25,6 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
     @Override
     public boolean validate(ProductDTO productInput) {
-        // Todo: Validate the product entry.
-        // 1. [X] Set up the logic for validating the required fields.
-        // 2. [ ] Parse valid product to the Product model;
 
         if (isAnyRequiredFieldEmpty(productInput)){ return false; }
         if (isAnyStringFieldOutOfRange(productInput)){ return false; }
@@ -159,11 +152,6 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         validProduct.setName(productInput.getName());
         validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
         validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
-
-        String productImageUid = productInput.getImageUid();
-        validProduct.setImageUid(
-            productImageUid.isBlank() ? AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME : productInput.getImageUid()
-        );
 
         return validProduct;
 

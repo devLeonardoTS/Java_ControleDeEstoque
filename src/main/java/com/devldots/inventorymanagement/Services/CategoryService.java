@@ -3,7 +3,6 @@ package com.devldots.inventorymanagement.Services;
 import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Models.Category;
 
-import java.util.Collection;
 import java.util.List;
 
 public class CategoryService {
@@ -15,7 +14,7 @@ public class CategoryService {
     }
 
     public boolean saveCategory(Category validatedCategory){
-        // Todo: Complete category validation to receive a validatedCategory and save it to the DB.
+        // Todo: Category creation validation and logic.
         return false;
     }
 

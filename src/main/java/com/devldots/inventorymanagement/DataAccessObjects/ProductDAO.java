@@ -24,15 +24,73 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
     @Override
     public boolean save(Product validatedProduct) {
-        // Todo: New product registration SQL.
+        Connection connection = this.dbConnectable.getConnection();
 
-        System.out.println("CatID: " + validatedProduct.getIdCategory());
-        System.out.println("Name: " + validatedProduct.getName());
-        System.out.println("Price: " + validatedProduct.getUnitaryPrice());
-        System.out.println("Qtt: " + validatedProduct.getQuantity());
-        System.out.println("Photo: " + validatedProduct.getImageUid());
+        String sql = "";
+        boolean hasCustomImage = !validatedProduct.getImageUid().isBlank();
+        if (hasCustomImage){
+            sql = "INSERT INTO " + ProductSchema.TABLE_ID +
+                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ", " + ProductSchema.PHOTO_UID + ")" +
+                    " VALUES" +
+                    " (?, ?, ?, ?, ?);";
+        } else {
+            sql = "INSERT INTO " + ProductSchema.TABLE_ID +
+                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ")" +
+                    " VALUES" +
+                    " (?, ?, ?, ?);";
+        }
 
-        return false;
+        PreparedStatement pstmt = null;
+
+        try {
+            connection.setAutoCommit(false);
+
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, validatedProduct.getIdCategory());
+            pstmt.setString(2, validatedProduct.getName());
+            pstmt.setBigDecimal(3, validatedProduct.getUnitaryPrice());
+            pstmt.setInt(4, validatedProduct.getQuantity());
+            if (hasCustomImage){ pstmt.setString(5, validatedProduct.getImageUid()); }
+
+            int affectedRows = pstmt.executeUpdate();
+            boolean isOperationSuccessful = affectedRows > 0;
+
+            if (!isOperationSuccessful){
+                connection.rollback();
+                return false;
+            }
+
+            connection.commit();
+            return true;
+
+        } catch (SQLException ex){
+
+            try {
+                if (connection != null){
+                    connection.rollback();
+                }
+            } catch (SQLException rollbackEx){
+                System.getLogger(this.getClass().getName())
+                        .log(System.Logger.Level.WARNING, ex.getMessage(), rollbackEx);
+            }
+
+            System.getLogger(this.getClass().getName())
+                    .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+
+            return false;
+
+        } finally {
+
+            try {
+                if (connection != null) { connection.close(); }
+                if (pstmt != null) { pstmt.close(); }
+            } catch (SQLException ex){
+                System.getLogger(this.getClass().getName())
+                        .log(System.Logger.Level.ERROR, ex.getMessage(), ex);
+            }
+
+        }
+
     }
 
     @Override

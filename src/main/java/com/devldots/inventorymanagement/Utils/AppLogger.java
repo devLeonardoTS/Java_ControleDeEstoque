@@ -1,12 +1,10 @@
 package com.devldots.inventorymanagement.Utils;
 
 import com.devldots.inventorymanagement.Configs.AppConfig;
-import org.w3c.dom.ls.LSOutput;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
