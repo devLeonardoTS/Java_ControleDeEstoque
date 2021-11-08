@@ -27,7 +27,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
         Connection connection = this.dbConnectable.getConnection();
 
         String sql = "";
-        boolean hasCustomImage = !validatedProduct.getImageUid().isBlank();
+        boolean hasCustomImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank();
         if (hasCustomImage){
             sql = "INSERT INTO " + ProductSchema.TABLE_ID +
                     " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ", " + ProductSchema.PHOTO_UID + ")" +
@@ -43,6 +43,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
         PreparedStatement pstmt = null;
 
         try {
+
             connection.setAutoCommit(false);
 
             pstmt = connection.prepareStatement(sql);

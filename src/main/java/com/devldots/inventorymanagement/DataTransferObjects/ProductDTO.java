@@ -1,9 +1,10 @@
 package com.devldots.inventorymanagement.DataTransferObjects;
 
+import com.devldots.inventorymanagement.Models.Category;
+
 public class ProductDTO {
 
     private String idProduct;
-    private String idCategory;
     private String name;
     private String unitaryPrice;
     private String quantity;
@@ -11,15 +12,10 @@ public class ProductDTO {
     private String createdAt;
     private String updatedAt;
 
+    private CategoryDTO category;
+
     public ProductDTO() {
-        this.idProduct = "";
-        this.idCategory = "";
-        this.name = "";
-        this.unitaryPrice = "";
-        this.quantity = "";
-        this.imagePath = "";
-        this.createdAt = "";
-        this.updatedAt = "";
+        this.category = new CategoryDTO();
     }
 
     public String getIdProduct() {
@@ -28,14 +24,6 @@ public class ProductDTO {
 
     public void setIdProduct(String idProduct) {
         this.idProduct = idProduct;
-    }
-
-    public String getIdCategory() {
-        return idCategory;
-    }
-
-    public void setIdCategory(String idCategory) {
-        this.idCategory = idCategory;
     }
 
     public String getName() {
@@ -86,4 +74,11 @@ public class ProductDTO {
         this.updatedAt = updatedAt;
     }
 
+    public CategoryDTO getCategory() {
+        return category;
+    }
+
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
+    }
 }

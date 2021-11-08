@@ -5,6 +5,8 @@ import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Models.Product;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 
@@ -14,8 +16,11 @@ import java.awt.image.ImagingOpException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class ProductService {
@@ -29,33 +34,29 @@ public class ProductService {
         this.errorList = new ArrayList<>();
     }
 
-    public boolean saveProduct(ProductDTO productInput, AbstractDataEntryValidation<ProductDTO, Product> productValidator) {
+    public boolean saveProduct(Product validatedProduct, String selectedProductImagePath){
 
-        this.setProductValidator(productValidator);
-
-        boolean isProductValid = this.getProductValidator().validate(productInput);
-
-        if (!isProductValid){
-            this.getErrorList().addAll(this.getProductValidator().getErrorList());
-            return false;
+        if (selectedProductImagePath != null && !selectedProductImagePath.isBlank()) {
+            int imageSize = 150;
+            String newProductImageUUID = saveProductImageToDisk(selectedProductImagePath, imageSize, this.getErrorList());
+            if (newProductImageUUID == null){ return false; }
+            validatedProduct.setImageUid(newProductImageUUID);
         }
-
-        Product newProduct = this.getProductValidator().getValidated();
-
-        int imageSize = 150;
-        String newProductImageUUID = saveProductImageToDisk(productInput.getImagePath(), imageSize, this.getErrorList());
-
-        newProduct.setImageUid(newProductImageUUID);
 
         if (!this.getErrorList().isEmpty()){
-            removeImageFromDisk(newProductImageUUID, this.getErrorList());
+            if (validatedProduct.getImageUid() != null) {
+                removeImageFromDisk(validatedProduct.getImageUid(), this.getErrorList());
+            }
             return false;
         }
 
-        boolean isProductStored = this.getProductDao().save(newProduct);
+        boolean isProductStored = this.getProductDao().save(validatedProduct);
 
         if (!isProductStored){
-            removeImageFromDisk(newProductImageUUID, this.getErrorList());
+            if (validatedProduct.getImageUid() != null) {
+                removeImageFromDisk(validatedProduct.getImageUid(), this.getErrorList());
+            }
+            this.getErrorList().add("Failed to store the product into the database. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - Service failed to add product into the database.");
             return false;
         }
 
@@ -104,15 +105,18 @@ public class ProductService {
         this.errorList = errorList;
     }
 
-    private String saveProductImageToDisk(String imagePath, int targetedImgSize, List<String> errorMsgList){
-        if (imagePath.isBlank()){ return ""; }
+    private String saveProductImageToDisk(String selectedProductImagePath, int targetedImgSize, List<String> errorMsgList){
+        if (selectedProductImagePath == null || selectedProductImagePath.isBlank()){
+            errorMsgList.add("Failed to process product's image. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - Received product image's path as null.");
+            return null;
+        }
 
         BufferedImage imageFromPathBuffer = null;
         try {
-            imageFromPathBuffer = ImageIO.read(new File(imagePath));
+            imageFromPathBuffer = ImageIO.read(new File(selectedProductImagePath));
         } catch (IOException ex){
             errorMsgList.add("Couldn't find the image file, are you sure the image still exists?");
-            return "";
+            return null;
         }
 
         BufferedImage resizedImageBuffer = null;
@@ -121,11 +125,11 @@ public class ProductService {
                 resizedImageBuffer = Scalr.resize(imageFromPathBuffer, Scalr.Method.ULTRA_QUALITY, targetedImgSize);
             } catch (ImagingOpException | IllegalArgumentException ex) {
                 errorMsgList.add("Failed to process product's image. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
-                return "";
+                return null;
             }
         }
 
-        String imageExtension = FilenameUtils.getExtension(imagePath);
+        String imageExtension = FilenameUtils.getExtension(selectedProductImagePath);
 
         String resizedImageUUID = UUID.randomUUID() + "." + imageExtension;
         String resizedImageDestination = Path.of(AppConfig.PRODUCT_IMG_DIR, resizedImageUUID).toString();
@@ -144,11 +148,11 @@ public class ProductService {
             boolean isImageProcessingComplete = ImageIO.write(resizedImageBuffer, imageExtension, resizedImageFile);
             if (!isImageProcessingComplete){
                 errorMsgList.add("Failed to process product's image. The image format must be one of the following: \".jpg\", \".jpeg\" or \".png\".");
-                return "";
+                return null;
             }
         } catch (IOException ex){
             errorMsgList.add("Failed to process product's image. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
-            return "";
+            return null;
         }
 
         return resizedImageUUID;
@@ -170,4 +174,31 @@ public class ProductService {
 
         return true;
     }
+
+    private String parseProductToUserVerifiableString(Product validatedProduct, List<String> errorMsgList){
+
+        String productData = "";
+
+        productData += "• Name: " + validatedProduct.getName() + "\n";
+        productData += "• Price: ";
+        try {
+            DecimalFormat monetaryFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
+            String monetarySymbol = monetaryFormatter.getCurrency().getSymbol(Locale.getDefault());
+            monetaryFormatter.setNegativePrefix(monetarySymbol + " -");
+            monetaryFormatter.setMinimumIntegerDigits(1);
+            monetaryFormatter.setMinimumFractionDigits(2);
+            monetaryFormatter.setMaximumFractionDigits(2);
+
+            productData += monetaryFormatter.format(validatedProduct.getUnitaryPrice()) + "\n";
+        } catch (Exception ex){
+            errorMsgList.add("Failed to display product entry data and confirmation. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+        }
+
+        productData += "• Quantity: " + validatedProduct.getQuantity() + "\n";
+        productData += "• Category: " + validatedProduct.getCategory().getName() + "\n";
+        productData += "• Has custom image? " + (validatedProduct.getImageUid().isBlank() ? "No" : "Yes") + "\n";
+
+        return productData;
+    }
+
 }

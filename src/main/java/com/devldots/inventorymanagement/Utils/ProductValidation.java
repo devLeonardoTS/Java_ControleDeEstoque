@@ -2,6 +2,7 @@ package com.devldots.inventorymanagement.Utils;
 
 import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
+import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, Product> {
 
@@ -45,7 +47,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         String productName = productInput.getName();
         String unitaryPrice = productInput.getUnitaryPrice();
         String quantity = productInput.getQuantity();
-        String categoryId = productInput.getIdCategory();
+        String categoryId = productInput.getCategory().getIdCategory();
 
         List<String> invalidFieldList = new ArrayList<>();
 
@@ -125,7 +127,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
 
         try {
-            Integer.parseUnsignedInt(productInput.getIdCategory());
+            Integer.parseUnsignedInt(productInput.getCategory().getIdCategory());
         } catch (NumberFormatException ex){
             invalidFieldMsgList.add("The selected categoria is invalid.");
         }
@@ -147,17 +149,39 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         Product validProduct = new Product();
 
-        validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getIdCategory()));
+        validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
 
         validProduct.setName(productInput.getName());
         validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
         validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
+
+        Category validProductCategory = new Category();
+
+        validProductCategory.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
+        validProductCategory.setName(productInput.getCategory().getName());
+
+        validProduct.setCategory(validProductCategory);
 
         return validProduct;
 
     }
 
     private void requiredFieldValidation(String fieldName, String fieldValue, List<String> invalidFieldList){
+
+        if (fieldValue == null){
+
+            try {
+                if (invalidFieldList.isEmpty()) {
+                    invalidFieldList.add(fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1));
+                } else {
+                    invalidFieldList.add(", " + fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1));
+                }
+            } catch (IndexOutOfBoundsException ex){
+                return;
+            }
+
+            return;
+        }
 
         if (fieldValue.isBlank()){
             try {
@@ -234,7 +258,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         }
 
         if (fieldValue.matches("(.*)([^0-9,.+-])(.*)")){
-            invalidFieldMsgList.add(fieldName + "'s input doesn't accept literal characters.");
+            invalidFieldMsgList.add(fieldName + "'s input don't accept literal characters.");
             return;
         }
 
