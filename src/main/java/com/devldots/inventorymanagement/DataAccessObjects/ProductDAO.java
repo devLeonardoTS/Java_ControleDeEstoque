@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class ProductDAO implements IDataAccessObject<Product> {
 
@@ -23,9 +23,75 @@ public class ProductDAO implements IDataAccessObject<Product> {
     }
 
     @Override
-    public boolean save(Product object) {
-        // Todo: New product registration.
-        return false;
+    public boolean save(Product validatedProduct) {
+        Connection connection = this.dbConnectable.getConnection();
+
+        String sql = "";
+        boolean hasCustomImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank();
+        if (hasCustomImage){
+            sql = "INSERT INTO " + ProductSchema.TABLE_ID +
+                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ", " + ProductSchema.PHOTO_UID + ")" +
+                    " VALUES" +
+                    " (?, ?, ?, ?, ?);";
+        } else {
+            sql = "INSERT INTO " + ProductSchema.TABLE_ID +
+                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ")" +
+                    " VALUES" +
+                    " (?, ?, ?, ?);";
+        }
+
+        PreparedStatement pstmt = null;
+
+        try {
+
+            connection.setAutoCommit(false);
+
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, validatedProduct.getIdCategory());
+            pstmt.setString(2, validatedProduct.getName());
+            pstmt.setBigDecimal(3, validatedProduct.getUnitaryPrice());
+            pstmt.setInt(4, validatedProduct.getQuantity());
+            if (hasCustomImage){ pstmt.setString(5, validatedProduct.getImageUid()); }
+
+            int affectedRows = pstmt.executeUpdate();
+            boolean isOperationSuccessful = affectedRows > 0;
+
+            if (!isOperationSuccessful){
+                connection.rollback();
+                return false;
+            }
+
+            connection.commit();
+            return true;
+
+        } catch (SQLException ex){
+
+            try {
+                if (connection != null){
+                    connection.rollback();
+                }
+            } catch (SQLException rollbackEx){
+                System.getLogger(this.getClass().getName())
+                        .log(System.Logger.Level.WARNING, ex.getMessage(), rollbackEx);
+            }
+
+            System.getLogger(this.getClass().getName())
+                    .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+
+            return false;
+
+        } finally {
+
+            try {
+                if (connection != null) { connection.close(); }
+                if (pstmt != null) { pstmt.close(); }
+            } catch (SQLException ex){
+                System.getLogger(this.getClass().getName())
+                        .log(System.Logger.Level.ERROR, ex.getMessage(), ex);
+            }
+
+        }
+
     }
 
     @Override
@@ -34,7 +100,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
     }
 
     @Override
-    public Collection<Product> getAll() {
+    public List<Product> getAll() {
 
         Connection connection = this.dbConnectable.getConnection();
 
@@ -49,7 +115,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
 
-        Collection<Product> products = new ArrayList<>();
+        List<Product> products = new ArrayList<>();
 
         try {
 

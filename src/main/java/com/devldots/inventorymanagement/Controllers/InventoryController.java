@@ -1,5 +1,6 @@
 package com.devldots.inventorymanagement.Controllers;
 
+import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
 import com.devldots.inventorymanagement.Components.CBoxBtnCellWithPromptText;
 import com.devldots.inventorymanagement.Components.TableCellWithDateFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
@@ -7,11 +8,14 @@ import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
 import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
+import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
 import com.devldots.inventorymanagement.Services.CategoryService;
 import com.devldots.inventorymanagement.Services.ProductService;
+import com.devldots.inventorymanagement.Utils.ProductValidation;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -22,6 +26,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.InputStream;
@@ -29,8 +34,11 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 public class InventoryController {
@@ -77,9 +85,9 @@ public class InventoryController {
 
         setOnPressEscapeHandler();
 
-        fillCategoryList();
+        refreshCategoryCombobox();
 
-        fillProductTable();
+        refreshProductsTable();
 
     }
 
@@ -88,9 +96,9 @@ public class InventoryController {
 
     }
 
-    @FXML private void registerNewProduct() {
+    @FXML private void productRegistrationHandler() {
 
-        String btnValue = this.btnRegister.getText();
+        String btnValue = this.btnRegister.getText() != null ? this.btnRegister.getText() : "" ;
 
         if (btnValue.equals("Novo Prod.")) {
             this.resetControls();
@@ -100,10 +108,95 @@ public class InventoryController {
         }
 
         if (btnValue.equals("Cadastrar")){
-            // Todo: Register product into the database.
+
+            Platform.runLater(() -> {
+                ProductDTO productInput = this.getProductInputData();
+
+                AbstractDataEntryValidation<ProductDTO, Product> productValidator = new ProductValidation();
+
+                productValidator.validate(productInput);
+                boolean isProductValidated = productValidator.getErrorList().isEmpty();
+                if (!isProductValidated){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Attention");
+                    alert.setHeaderText("Couldn't register your product");
+                    String errorMsg = "";
+                    for (String error : productValidator.getErrorList()){
+                        errorMsg += error + "\n";
+                    }
+                    alert.setContentText(errorMsg);
+                    alert.showAndWait();
+                    return;
+                }
+
+                Product validatedProduct = productValidator.getValidated();
+
+                List<String> errorMsgList = new ArrayList<>();
+                String verifiableProductData = parseProductToUserVerifiableString(validatedProduct, productInput.getImagePath(), errorMsgList);
+                if (!errorMsgList.isEmpty()){
+                    String errorMsg = "";
+                    for (String error : errorMsgList){
+                        errorMsg += "• " + error + "\n";
+                    }
+
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Ops! Something went wrong");
+                    errorAlert.setHeaderText("Please contact the administrator");
+                    errorAlert.setContentText(errorMsg);
+                    errorAlert.showAndWait();
+                    return;
+
+                }
+                Alert entryConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                entryConfirmationAlert.setTitle("Confirm this product's entry");
+                entryConfirmationAlert.setContentText(verifiableProductData);
+                boolean isProductDataConfirmedByUser = entryConfirmationAlert.showAndWait().get() == ButtonType.OK;
+                if (!isProductDataConfirmedByUser){ return; }
+
+                Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
+
+                processingAlert.setTitle("Processing...");
+                processingAlert.setHeaderText("Please wait...");
+                processingAlert.setContentText("I'm storing the product's data...");
+                processingAlert.getButtonTypes().clear();
+                processingAlert.show();
+
+                Platform.runLater(() -> {
+
+                    ProductService productService = new ProductService(new ProductDAO(new SQLiteConnection()));
+
+                    productService.saveProduct(validatedProduct, productInput.getImagePath());
+
+                    processingAlert.setResult(ButtonType.FINISH);
+
+                    boolean isProductStored = productService.getErrorList().isEmpty();
+                    if (!isProductStored){
+
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Couldn't register your product");
+                        String errorMsg = "";
+                        for (String error : productService.getErrorList()){
+                            errorMsg += error + "\n";
+                        }
+                        alert.setContentText(errorMsg);
+                        alert.showAndWait();
+                        return;
+                    }
+
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Success!");
+                    successAlert.setHeaderText("Product's data has been successfully stored");
+                    successAlert.show();
+
+                    this.refreshProductsTable();
+                    this.resetControls();
+
+                });
+
+            });
+
         }
-
-
 
     }
 
@@ -119,7 +212,27 @@ public class InventoryController {
         this.resetControls();
     }
 
-    @FXML private void productImgSelectionHandler() { }
+    @FXML private void productImgSelectionHandler() {
+
+        if (this.isProductOperationsEnabled){
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Selecione a foto do produto");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+
+            File selectedFile = fileChooser.showOpenDialog(null);
+
+            if (selectedFile != null){
+                this.lblChangeProductImg.setVisible(false);
+
+                Image selectedProductImage = new Image(selectedFile.getPath());
+
+                this.imgvProductImg.setClip(this.clipProductImg.getClip());
+                this.imgvProductImg.setImage(selectedProductImage);
+                this.centralizeImage(this.imgvProductImg);
+            }
+        }
+
+    }
 
     @FXML private void productSelectionHandler() {
 
@@ -167,7 +280,7 @@ public class InventoryController {
         this.lblChangeProductImg.setVisible(false);
 
         this.resetProductImg();
-    };
+    }
 
     private void resetProductImg(){
         InputStream productImgInputStream = this.getClass().getClassLoader().getResourceAsStream(AppConfig.DEFAULT_PRODUCT_IMG_RESOURCE_PATH);
@@ -299,24 +412,77 @@ public class InventoryController {
         }
     }
 
-    public void fillCategoryList(){
-        new Thread(() -> {
-            Collection<Category> categoryList = this.cboProductCategory.getItems();
-            categoryList.addAll(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategories());
-        }).start();
+    private void refreshCategoryCombobox(){
+        Platform.runLater(() -> {
+            Collection<Category> categoryCBox = this.cboProductCategory.getItems();
+            categoryCBox.clear();
+            categoryCBox.addAll(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategories());
+        });
     }
 
-    public void fillProductTable(){
-        new Thread(() -> {
-            Collection<Product> productTable = this.tblProducts.getItems();
+    private void refreshProductsTable(){
+        Platform.runLater(() -> {
 
-            Collection<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
+            List<Product> productTable = this.tblProducts.getItems();
+
+            productTable.clear();
+
+            List<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
             for(Product product : products){
                 product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
                 productTable.add(product);
             }
-        }).start();
+        });
     }
 
+    private ProductDTO getProductInputData(){
+
+        String productName = this.txtProductName != null ? this.txtProductName.getText() : "";
+        String productUnitaryPrice = this.txtProductUnitaryPrice != null ? this.txtProductUnitaryPrice.getText() : "";
+        String productQuantity = this.txtProductQuantity != null ? this.txtProductQuantity.getText() : "";
+        String productImagePath = this.imgvProductImg.getImage().getUrl() != null ? this.imgvProductImg.getImage().getUrl() : "";
+
+        String selectedCategoryId = this.cboProductCategory.getSelectionModel().getSelectedItem() != null ? Integer.toString(this.cboProductCategory.getSelectionModel().getSelectedItem().getIdCategory()) : "";
+        String selectedCategoryName = this.cboProductCategory.getSelectionModel().getSelectedItem() != null ? this.cboProductCategory.getSelectionModel().getSelectedItem().getName() : "";
+
+        ProductDTO productInput = new ProductDTO();
+
+        productInput.setName(productName);
+        productInput.setUnitaryPrice(productUnitaryPrice);
+        productInput.setQuantity(productQuantity);
+        productInput.setImagePath(productImagePath);
+
+        productInput.getCategory().setIdCategory(selectedCategoryId);
+        productInput.getCategory().setName(selectedCategoryName);
+
+        return productInput;
+
+    }
+
+    private String parseProductToUserVerifiableString(Product validatedProduct, String selectedProductImagePath, List<String> errorMsgList){
+
+        String productData = "";
+
+        productData += "• Name: " + validatedProduct.getName() + "\n";
+        productData += "• Price: ";
+        try {
+            DecimalFormat monetaryFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
+            String monetarySymbol = monetaryFormatter.getCurrency().getSymbol(Locale.getDefault());
+            monetaryFormatter.setNegativePrefix(monetarySymbol + " -");
+            monetaryFormatter.setMinimumIntegerDigits(1);
+            monetaryFormatter.setMinimumFractionDigits(2);
+            monetaryFormatter.setMaximumFractionDigits(2);
+
+            productData += monetaryFormatter.format(validatedProduct.getUnitaryPrice()) + "\n";
+        } catch (Exception ex){
+            errorMsgList.add("Failed to display product entry data and confirmation. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+        }
+
+        productData += "• Quantity: " + validatedProduct.getQuantity() + "\n";
+        productData += "• Category: " + validatedProduct.getCategory().getName() + "\n";
+        productData += "• Has custom image? " + (selectedProductImagePath != null && !selectedProductImagePath.isBlank() ? "Yes" : "No") + "\n";
+
+        return productData;
+    }
 
 }
