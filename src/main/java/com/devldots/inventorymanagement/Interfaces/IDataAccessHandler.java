@@ -2,7 +2,7 @@ package com.devldots.inventorymanagement.Interfaces;
 
 import java.util.List;
 
-public interface IDataAccessObject<T> {
+public interface IDataAccessHandler<T> {
 
     boolean save(T object);
 

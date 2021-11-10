@@ -10,18 +10,15 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImagingOpException;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ProductImageHandler implements IImageHandler {
 
     private List<String> errorList;
-    private String imageId;
 
     public ProductImageHandler(){
         this.errorList = new ArrayList<>();

@@ -12,7 +12,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, Product> {

@@ -7,7 +7,7 @@ import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
-import com.devldots.inventorymanagement.DataAccessObjects.ProductDAOThree;
+import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import com.devldots.inventorymanagement.Models.Category;
@@ -167,7 +167,7 @@ public class InventoryController {
                 Platform.runLater(() -> {
 
                     ProductService productService = new ProductService(
-                        new ProductDAOThree(
+                        new ProductDAO(
                             new SQLiteConnection()
                         )
                     );
@@ -216,24 +216,11 @@ public class InventoryController {
             this.enableProductOperation();
             this.btnRegister.setDisable(true);
             this.btnUpdate.setText("Salvar");
-//            System.out.println(selectedProduct.getImageUid());
-//            if (!selectedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME)) {
-//                this.btnResetProductImageToDefault.setDisable(false);
-//            }
         }
 
         if (btnValue.equals("Salvar")){
 
             Platform.runLater(() -> {
-
-                System.out.println("ProdId: " + selectedProduct.getIdProduct());
-                System.out.println("CatId: " + this.cboProductCategory.getSelectionModel().getSelectedItem().getIdCategory());
-                System.out.println("Name: " + this.txtProductName.getText());
-                System.out.println("Price: " + this.txtProductUnitaryPrice.getText());
-                System.out.println("Quantity: " + this.txtProductQuantity.getText());
-                System.out.println("Photo: " + this.imgvProductImg.getImage().getUrl());
-
-                // Update logic.
 
                 ProductDTO productInput = this.getProductInputData();
 
@@ -289,7 +276,7 @@ public class InventoryController {
                 Platform.runLater(() -> {
 
                     ProductService productService = new ProductService(
-                            new ProductDAOThree(
+                            new ProductDAO(
                                     new SQLiteConnection()
                             )
                     );
@@ -326,11 +313,6 @@ public class InventoryController {
             });
 
         }
-
-
-
-
-
 
     }
 
@@ -607,12 +589,9 @@ public class InventoryController {
 
             productTable.clear();
 
-            List<Product> products = new ProductService(new ProductDAOThree(new SQLiteConnection())).getProducts();
+            List<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
             productTable.addAll(products);
-//            for(Product product : products){
-//                product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
-//                productTable.add(product);
-//            }
+
         });
     }
 

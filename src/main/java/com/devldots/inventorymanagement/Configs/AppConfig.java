@@ -1,15 +1,10 @@
 package com.devldots.inventorymanagement.Configs;
 
-import com.devldots.inventorymanagement.Utils.AppLogger;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.logging.Level;
 
 public final class AppConfig {
     public final static String WORKING_DIR = Path.of(System.getProperty("user.dir")).toString();
@@ -27,17 +22,6 @@ public final class AppConfig {
     public final static String DEFAULT_COMPANY_LOGO_FILE_NAME = "default_company_logo.png";
 
     public final static String DEFAULT_DB_PATH = Path.of(WORKING_DIR, "database.db").toString();
-
-    // private static String dbUsername = "root";
-    // private static String dbPassword = "";
-
-    // public static String getDbUsername() {
-    //     return dbUsername;
-    // }
-
-    // public static String getDbPassword() {
-    //     return dbPassword;
-    // }
 
     public static void createFileDirectories() {
 
@@ -58,24 +42,6 @@ public final class AppConfig {
             System.out.println(ex);
         }
 
-//        Path path = Path.of(directoryPath);
-//        if(Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)){
-//            try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)){
-//                recursiveDirectoryRemoval(entries);
-//            } catch (IOException ex){
-//                AppLogger.getAppLogger(this.getClass().getName())
-//                    .log(Level.SEVERE, ex.getMessage(), ex);
-//                return;
-//            }
-//        }
-//
-//        try {
-//            Files.delete(path);
-//        } catch (IOException ex){
-//            AppLogger.getAppLogger(this.getClass().getName())
-//                    .log(Level.SEVERE, ex.getMessage(), ex);
-//            return;
-//        }
     }
 
 }

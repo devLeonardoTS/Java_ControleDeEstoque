@@ -1,7 +1,7 @@
 package com.devldots.inventorymanagement.Services;
 
 import com.devldots.inventorymanagement.Configs.AppConfig;
-import com.devldots.inventorymanagement.Interfaces.IProductDataHandler;
+import com.devldots.inventorymanagement.Interfaces.IDataAccessHandler;
 import com.devldots.inventorymanagement.Models.Product;
 import com.devldots.inventorymanagement.Utils.ProductImageHandler;
 
@@ -10,10 +10,10 @@ import java.util.List;
 
 public class ProductService {
 
-    private IProductDataHandler productDao;
+    private IDataAccessHandler<Product> productDao;
     private List<String> errorList;
 
-    public ProductService(IProductDataHandler productDao){
+    public ProductService(IDataAccessHandler<Product> productDao){
         this.productDao = productDao;
         this.errorList = new ArrayList<>();
     }
@@ -63,6 +63,7 @@ public class ProductService {
     }
 
     public Product getProduct(int id) throws NullPointerException {
+        // Todo: ProductService - getProduct(int id);
         return null;
     }
 
@@ -142,14 +143,15 @@ public class ProductService {
     }
 
     public boolean deleteProduct(int id) {
+        // Todo: ProductService - deleteProduct(int id);
         return false;
     }
 
-    public IProductDataHandler getProductDao() {
+    public IDataAccessHandler<Product> getProductDao() {
         return productDao;
     }
 
-    public void setProductDao(IProductDataHandler productDao) {
+    public void setProductDao(IDataAccessHandler<Product> productDao) {
         this.productDao = productDao;
     }
 

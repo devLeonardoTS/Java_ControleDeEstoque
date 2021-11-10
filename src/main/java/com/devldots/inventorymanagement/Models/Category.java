@@ -1,10 +1,5 @@
 package com.devldots.inventorymanagement.Models;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 public class Category {
 
     private int idCategory;
