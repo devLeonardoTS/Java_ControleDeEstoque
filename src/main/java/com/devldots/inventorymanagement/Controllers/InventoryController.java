@@ -7,7 +7,7 @@ import com.devldots.inventorymanagement.Components.TableCellWithMonetaryFormat;
 import com.devldots.inventorymanagement.Components.TableCellWithTooltip;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataAccessObjects.CategoryDAO;
-import com.devldots.inventorymanagement.DataAccessObjects.ProductDAO;
+import com.devldots.inventorymanagement.DataAccessObjects.ProductDAOThree;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Factory.SQLiteConnection;
 import com.devldots.inventorymanagement.Models.Category;
@@ -67,6 +67,8 @@ public class InventoryController {
     @FXML private Button btnDelete;
     @FXML private Button btnCancel;
     @FXML private Button btnLogout;
+    @FXML private Button btnResetProductImageToDefault;
+    @FXML private Button btnResetProductImage;
 
     @FXML private TableView<Product> tblProducts;
     @FXML private TableColumn<Product, Integer> tblColProductId;
@@ -78,6 +80,7 @@ public class InventoryController {
     @FXML private TableColumn<Product, LocalDateTime> tblColProductUpdateDate;
 
     private boolean isProductOperationsEnabled = false;
+    private String selectedProductFirstImagePath = null;
 
     @FXML private void initialize(){
 
@@ -114,7 +117,7 @@ public class InventoryController {
 
                 AbstractDataEntryValidation<ProductDTO, Product> productValidator = new ProductValidation();
 
-                productValidator.validate(productInput);
+                productValidator.validate(productInput, new Product());
                 boolean isProductValidated = productValidator.getErrorList().isEmpty();
                 if (!isProductValidated){
                     Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -163,7 +166,11 @@ public class InventoryController {
 
                 Platform.runLater(() -> {
 
-                    ProductService productService = new ProductService(new ProductDAO(new SQLiteConnection()));
+                    ProductService productService = new ProductService(
+                        new ProductDAOThree(
+                            new SQLiteConnection()
+                        )
+                    );
 
                     productService.saveProduct(validatedProduct, productInput.getImagePath());
 
@@ -174,7 +181,7 @@ public class InventoryController {
 
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error");
-                        alert.setHeaderText("Couldn't register your product");
+                        alert.setHeaderText("Something went wrong while registering your product");
                         String errorMsg = "";
                         for (String error : productService.getErrorList()){
                             errorMsg += error + "\n";
@@ -202,7 +209,128 @@ public class InventoryController {
 
     @FXML private void editProduct() {
 
-        // this.enableProductOperation();
+        String btnValue = this.btnUpdate.getText() != null ? this.btnUpdate.getText() : "" ;
+        Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
+
+        if (btnValue.equals("Atualizar")){
+            this.enableProductOperation();
+            this.btnRegister.setDisable(true);
+            this.btnUpdate.setText("Salvar");
+//            System.out.println(selectedProduct.getImageUid());
+//            if (!selectedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME)) {
+//                this.btnResetProductImageToDefault.setDisable(false);
+//            }
+        }
+
+        if (btnValue.equals("Salvar")){
+
+            Platform.runLater(() -> {
+
+                System.out.println("ProdId: " + selectedProduct.getIdProduct());
+                System.out.println("CatId: " + this.cboProductCategory.getSelectionModel().getSelectedItem().getIdCategory());
+                System.out.println("Name: " + this.txtProductName.getText());
+                System.out.println("Price: " + this.txtProductUnitaryPrice.getText());
+                System.out.println("Quantity: " + this.txtProductQuantity.getText());
+                System.out.println("Photo: " + this.imgvProductImg.getImage().getUrl());
+
+                // Update logic.
+
+                ProductDTO productInput = this.getProductInputData();
+
+                AbstractDataEntryValidation<ProductDTO, Product> productValidator = new ProductValidation();
+
+                productValidator.validate(productInput, selectedProduct);
+                boolean isProductValidated = productValidator.getErrorList().isEmpty();
+                if (!isProductValidated){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Attention");
+                    alert.setHeaderText("Couldn't update the product's data");
+                    String errorMsg = "";
+                    for (String error : productValidator.getErrorList()){
+                        errorMsg += error + "\n";
+                    }
+                    alert.setContentText(errorMsg);
+                    alert.showAndWait();
+                    return;
+                }
+
+                Product validatedProduct = productValidator.getValidated();
+
+                List<String> errorMsgList = new ArrayList<>();
+                String verifiableProductData = parseProductToUserVerifiableString(validatedProduct, productInput.getImagePath(), errorMsgList);
+                if (!errorMsgList.isEmpty()){
+                    String errorMsg = "";
+                    for (String error : errorMsgList){
+                        errorMsg += "• " + error + "\n";
+                    }
+
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Ops! Something went wrong");
+                    errorAlert.setHeaderText("Please contact the administrator");
+                    errorAlert.setContentText(errorMsg);
+                    errorAlert.showAndWait();
+                    return;
+
+                }
+                Alert entryConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                entryConfirmationAlert.setTitle("Confirm this product's entry");
+                entryConfirmationAlert.setContentText(verifiableProductData);
+                boolean isProductDataConfirmedByUser = entryConfirmationAlert.showAndWait().get() == ButtonType.OK;
+                if (!isProductDataConfirmedByUser){ return; }
+
+                Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
+
+                processingAlert.setTitle("Processing...");
+                processingAlert.setHeaderText("Please wait...");
+                processingAlert.setContentText("I'm updating the product's data...");
+                processingAlert.getButtonTypes().clear();
+                processingAlert.show();
+
+                Platform.runLater(() -> {
+
+                    ProductService productService = new ProductService(
+                            new ProductDAOThree(
+                                    new SQLiteConnection()
+                            )
+                    );
+
+                    productService.updateProduct(validatedProduct, productInput.getImagePath());
+
+                    processingAlert.setResult(ButtonType.FINISH);
+
+                    boolean isProductStored = productService.getErrorList().isEmpty();
+                    if (!isProductStored){
+
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Something went wrong while updating your product");
+                        String errorMsg = "";
+                        for (String error : productService.getErrorList()){
+                            errorMsg += error + "\n";
+                        }
+                        alert.setContentText(errorMsg);
+                        alert.showAndWait();
+                        return;
+                    }
+
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Success!");
+                    successAlert.setHeaderText("Product's data has been successfully updated");
+                    successAlert.show();
+
+                    this.refreshProductsTable();
+                    this.resetControls();
+
+                });
+
+            });
+
+        }
+
+
+
+
+
 
     }
 
@@ -229,12 +357,19 @@ public class InventoryController {
                 this.imgvProductImg.setClip(this.clipProductImg.getClip());
                 this.imgvProductImg.setImage(selectedProductImage);
                 this.centralizeImage(this.imgvProductImg);
+
+                this.btnResetProductImageToDefault.setDisable(false);
+
+                boolean hasImageChanged = this.selectedProductFirstImagePath != null && !this.selectedProductFirstImagePath.isBlank();
+                if (hasImageChanged) { this.btnResetProductImage.setDisable(false); }
             }
         }
 
     }
 
     @FXML private void productSelectionHandler() {
+
+        this.selectedProductFirstImagePath = null;
 
         Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
 
@@ -249,6 +384,7 @@ public class InventoryController {
 
     private void resetControls(){
         this.isProductOperationsEnabled = false;
+        this.selectedProductFirstImagePath = null;
 
         this.btnRegister.setDisable(false);
         this.btnRegister.setText("Novo Prod.");
@@ -258,6 +394,9 @@ public class InventoryController {
 
         this.btnCancel.setDisable(true);
         this.btnDelete.setDisable(true);
+
+        this.btnResetProductImageToDefault.setDisable(true);
+        this.btnResetProductImage.setDisable(true);
 
         this.txtProductName.setDisable(true);
         this.txtProductName.clear();
@@ -279,16 +418,34 @@ public class InventoryController {
 
         this.lblChangeProductImg.setVisible(false);
 
-        this.resetProductImg();
+        this.resetProductImageToDefault();
     }
 
-    private void resetProductImg(){
+    @FXML private void resetProductImageToDefault(){
         InputStream productImgInputStream = this.getClass().getClassLoader().getResourceAsStream(AppConfig.DEFAULT_PRODUCT_IMG_RESOURCE_PATH);
         if (productImgInputStream != null){
             Image defaultProductImg = new Image(productImgInputStream);
             this.imgvProductImg.setClip(this.clipProductImg.getClip());
             this.imgvProductImg.setImage(defaultProductImg);
             this.centralizeImage(this.imgvProductImg);
+        }
+
+        this.btnResetProductImageToDefault.setDisable(true);
+
+        boolean hasImageChanged = selectedProductFirstImagePath != null && !selectedProductFirstImagePath.isBlank();
+        if (!hasImageChanged) { this.btnResetProductImage.setDisable(true); }
+        if (hasImageChanged) { this.btnResetProductImage.setDisable(false); }
+
+        this.lblChangeProductImg.setVisible(false);
+    }
+
+    @FXML private void resetProductImage(){
+        boolean hasImageChanged = selectedProductFirstImagePath != null && !selectedProductFirstImagePath.isBlank();
+        if (this.isProductOperationsEnabled && hasImageChanged) {
+            this.fillProductImageView(selectedProductFirstImagePath);
+            this.lblChangeProductImg.setVisible(true);
+            this.btnResetProductImage.setDisable(true);
+            this.btnResetProductImageToDefault.setDisable(false);
         }
     }
 
@@ -321,6 +478,15 @@ public class InventoryController {
         this.clipProductImg.setStroke(Color.BLUE);
 
         this.lblChangeProductImg.setVisible(true);
+
+        Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
+
+        if (selectedProduct != null) {
+            boolean isSelectedProductUsingCustomImage = selectedProduct.getImageUid() != null && !selectedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
+            if (isSelectedProductUsingCustomImage) {
+                this.btnResetProductImageToDefault.setDisable(false);
+            }
+        }
 
     }
 
@@ -368,22 +534,36 @@ public class InventoryController {
         this.cboProductCategory.getSelectionModel().select(product.getCategory());
 
         String productImgPath = Path.of(AppConfig.PRODUCT_IMG_DIR, product.getImageUid()).toString();
-        File imgFile = new File(productImgPath);
+
+        boolean isProductImageAddedToImageView = fillProductImageView(productImgPath);
+
+        if (isProductImageAddedToImageView) { this.selectedProductFirstImagePath = productImgPath; }
+
+    }
+
+    private boolean fillProductImageView(String selectedImagePath){
+
+        File imgFile = new File(selectedImagePath);
+
         boolean imgFileExists = imgFile.exists();
         if (!imgFileExists) {
-            this.resetProductImg();
-            return;
+            this.resetProductImageToDefault();
+            return false;
         }
+
         Image productImg = null;
         try {
-            productImg = new Image(productImgPath);
+            productImg = new Image(selectedImagePath);
 
             this.imgvProductImg.setClip(this.clipProductImg.getClip());
             this.imgvProductImg.setImage(productImg);
             this.centralizeImage(this.imgvProductImg);
         } catch (NullPointerException | IllegalArgumentException ex){
-            this.resetProductImg();
+            this.resetProductImageToDefault();
+            return false;
         }
+
+        return true;
 
     }
 
@@ -427,11 +607,12 @@ public class InventoryController {
 
             productTable.clear();
 
-            List<Product> products = new ProductService(new ProductDAO(new SQLiteConnection())).getProducts();
-            for(Product product : products){
-                product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
-                productTable.add(product);
-            }
+            List<Product> products = new ProductService(new ProductDAOThree(new SQLiteConnection())).getProducts();
+            productTable.addAll(products);
+//            for(Product product : products){
+//                product.setCategory(new CategoryService(new CategoryDAO(new SQLiteConnection())).getCategory(product.getIdCategory()));
+//                productTable.add(product);
+//            }
         });
     }
 
@@ -480,7 +661,15 @@ public class InventoryController {
 
         productData += "• Quantity: " + validatedProduct.getQuantity() + "\n";
         productData += "• Category: " + validatedProduct.getCategory().getName() + "\n";
-        productData += "• Has custom image? " + (selectedProductImagePath != null && !selectedProductImagePath.isBlank() ? "Yes" : "No") + "\n";
+
+        System.out.println(selectedProductImagePath);
+        System.out.println(validatedProduct.getImageUid());
+
+        boolean isProductImageUnchanged = validatedProduct.getImageUid() != null && selectedProductImagePath.contains(validatedProduct.getImageUid());
+        boolean isProductImageDefault = (validatedProduct.getImageUid() == null || validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME)) && selectedProductImagePath.isBlank();
+        boolean hasNewImage = !isProductImageUnchanged && !isProductImageDefault;
+
+        productData += "• Has new image? " + (hasNewImage ? "Yes" : "No") + "\n";
 
         return productData;
     }

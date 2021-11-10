@@ -10,8 +10,12 @@ public interface IDataAccessObject<T> {
 
     List<T> getAll();
 
-    T update(T object) throws NullPointerException;
+    boolean update(T object);
 
     boolean delete (Object id) throws IllegalArgumentException;
+
+    List<String> getErrorList();
+
+    void setErrorList(List<String> errorList);
 
 }

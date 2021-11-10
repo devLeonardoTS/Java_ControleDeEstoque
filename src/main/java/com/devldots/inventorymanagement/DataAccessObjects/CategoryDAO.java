@@ -2,7 +2,7 @@ package com.devldots.inventorymanagement.DataAccessObjects;
 
 import com.devldots.inventorymanagement.Constants.CategorySchema;
 import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
-import com.devldots.inventorymanagement.Interfaces.IDbConnection;
+import com.devldots.inventorymanagement.Interfaces.IDatabaseConnectionHandler;
 import com.devldots.inventorymanagement.Models.Category;
 
 import java.sql.Connection;
@@ -14,9 +14,10 @@ import java.util.List;
 
 public class CategoryDAO implements IDataAccessObject<Category> {
 
-    IDbConnection dbConnectable;
+    private IDatabaseConnectionHandler dbConnectable;
+    private List<String> errorList;
 
-    public CategoryDAO(IDbConnection dbConnectable){
+    public CategoryDAO(IDatabaseConnectionHandler dbConnectable){
         this.dbConnectable = dbConnectable;
     }
 
@@ -135,13 +136,26 @@ public class CategoryDAO implements IDataAccessObject<Category> {
     }
 
     @Override
-    public Category update(Category object) throws NullPointerException {
-        return null;
+    public boolean update(Category object) {
+
+
+
+        return false;
     }
 
     @Override
     public boolean delete(Object id) throws IllegalArgumentException {
         return false;
+    }
+
+    @Override
+    public List<String> getErrorList() {
+        return null;
+    }
+
+    @Override
+    public void setErrorList(List<String> errorList) {
+        this.errorList = errorList;
     }
 
 }

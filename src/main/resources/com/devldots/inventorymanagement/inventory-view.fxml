@@ -24,17 +24,19 @@
                         <Button id="btnCancel" fx:id="btnCancel" disable="true" layoutX="477.0" layoutY="71.0" minHeight="25.0" minWidth="62.0" mnemonicParsing="false" onAction="#cancelProductOperations" text="Cancelar" />
                         <Button id="btnDelete" fx:id="btnDelete" disable="true" layoutX="400.0" layoutY="127.0" minHeight="25.0" minWidth="55.0" mnemonicParsing="false" text="Deletar" />
                         <Button id="btnLogout" fx:id="btnLogout" layoutX="481.0" layoutY="127.0" minHeight="25.0" minWidth="54.0" mnemonicParsing="false" onAction="#quickLilTest" text="Logout" />
-                        <ImageView id="imgvProductImg" fx:id="imgvProductImg" fitHeight="150.0" fitWidth="150.0" layoutX="221.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView id="imgvProductImg" fx:id="imgvProductImg" fitHeight="125.0" fitWidth="125.0" layoutX="234.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@/Assets/default_product_img.png" />
                      </image></ImageView>
-                        <Label id="lblChangeProductImg" fx:id="lblChangeProductImg" layoutX="247.0" layoutY="125.0" text="Clique para alterar" visible="false" />
-                        <Rectangle id="clipProductImg" fx:id="clipProductImg" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="150.0" layoutX="221.0" onMouseClicked="#productImgSelectionHandler" stroke="#0000003f" strokeType="OUTSIDE" width="150.0" />
+                        <Label id="lblChangeProductImg" fx:id="lblChangeProductImg" layoutX="248.0" layoutY="100.0" text="Clique para alterar" visible="false" />
+                        <Rectangle id="clipProductImg" fx:id="clipProductImg" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="125.0" layoutX="234.0" onMouseClicked="#productImgSelectionHandler" stroke="#0000003f" strokeType="OUTSIDE" width="125.0" />
                         <ImageView id="imgvCompanyLogoImg" fx:id="imgvCompanyLogoImg" fitHeight="50.0" fitWidth="50.0" layoutX="482.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@/Assets/default_company_logo.png" />
                      </image></ImageView>
                         <Rectangle id="clipCompanyLogoImg" fx:id="clipCompanyLogoImg" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="50.0" layoutX="482.0" stroke="#ffffff00" strokeType="OUTSIDE" width="50.0" />
+                  <Button id="btnResetProductImage" fx:id="btnResetProductImageToDefault" disable="true" layoutX="306.0" layoutY="127.0" minHeight="25.0" minWidth="50.0" mnemonicParsing="false" onAction="#resetProductImageToDefault" text="Padrão" />
+                  <Button fx:id="btnResetProductImage" disable="true" layoutX="233.0" layoutY="127.0" minHeight="25.0" minWidth="61.0" mnemonicParsing="false" onAction="#resetProductImage" text="Reiniciar" />
                     </children>
                 </AnchorPane>
             </children>

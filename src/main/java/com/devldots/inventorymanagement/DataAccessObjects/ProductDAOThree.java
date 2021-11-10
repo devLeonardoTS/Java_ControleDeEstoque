@@ -1,9 +1,12 @@
 package com.devldots.inventorymanagement.DataAccessObjects;
 
+import com.devldots.inventorymanagement.Configs.AppConfig;
+import com.devldots.inventorymanagement.Constants.CategorySchema;
 import com.devldots.inventorymanagement.Constants.ProductSchema;
-import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
 import com.devldots.inventorymanagement.Interfaces.IDatabaseConnectionHandler;
 import com.devldots.inventorymanagement.Interfaces.IImageHandler;
+import com.devldots.inventorymanagement.Interfaces.IProductDataHandler;
+import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
 
 import java.sql.Connection;
@@ -15,40 +18,39 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductDAO implements IDataAccessObject<Product> {
+public class ProductDAOThree implements IProductDataHandler {
 
-    private IDatabaseConnectionHandler dbConnectable;
-    private IImageHandler productImageHandler;
+    private IDatabaseConnectionHandler databaseConnectionHandler;
     private List<String> errorList;
 
-    public ProductDAO(IDatabaseConnectionHandler dbConnectable){
-        this.dbConnectable = dbConnectable;
-        this.errorList = new ArrayList<>();
-    }
-
-    public ProductDAO(IDatabaseConnectionHandler dbConnectable, IImageHandler productImageHandler){
-        this.dbConnectable = dbConnectable;
-        this.productImageHandler = productImageHandler;
+    public ProductDAOThree(IDatabaseConnectionHandler databaseConnectionHandler){
+        this.databaseConnectionHandler = databaseConnectionHandler;
         this.errorList = new ArrayList<>();
     }
 
     @Override
     public boolean save(Product validatedProduct) {
 
-        if (this.productImageHandler == null){ return false; }
+        boolean hasImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank();
 
-        Connection connection = this.dbConnectable.getConnection();
+        Connection connection = this.databaseConnectionHandler.getConnection();
 
-        String sql = "";
-        boolean hasCustomImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank();
-        if (hasCustomImage){
+        String sql = null;
+        if (hasImage){
             sql = "INSERT INTO " + ProductSchema.TABLE_ID +
-                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ", " + ProductSchema.PHOTO_UID + ")" +
+                    " (" + ProductSchema.FK_CATEGORY +
+                    ", " + ProductSchema.NAME +
+                    ", " + ProductSchema.UNITARY_PRICE +
+                    ", " + ProductSchema.QUANTITY +
+                    ", " + ProductSchema.PHOTO_UID + ")" +
                     " VALUES" +
                     " (?, ?, ?, ?, ?);";
         } else {
             sql = "INSERT INTO " + ProductSchema.TABLE_ID +
-                    " (" + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME + ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ")" +
+                    " (" + ProductSchema.FK_CATEGORY +
+                    ", " + ProductSchema.NAME +
+                    ", " + ProductSchema.UNITARY_PRICE +
+                    ", " + ProductSchema.QUANTITY + ")" +
                     " VALUES" +
                     " (?, ?, ?, ?);";
         }
@@ -64,11 +66,11 @@ public class ProductDAO implements IDataAccessObject<Product> {
             pstmt.setString(2, validatedProduct.getName());
             pstmt.setBigDecimal(3, validatedProduct.getUnitaryPrice());
             pstmt.setInt(4, validatedProduct.getQuantity());
-            if (hasCustomImage){ pstmt.setString(5, validatedProduct.getImageUid()); }
+            if (hasImage){ pstmt.setString(5, validatedProduct.getImageUid()); }
 
             int affectedRows = pstmt.executeUpdate();
-            boolean isOperationSuccessful = affectedRows > 0;
 
+            boolean isOperationSuccessful = affectedRows > 0;
             if (!isOperationSuccessful){
                 connection.rollback();
                 return false;
@@ -77,11 +79,13 @@ public class ProductDAO implements IDataAccessObject<Product> {
             connection.commit();
             return true;
 
-        } catch (SQLException ex){
+        } catch (SQLException ex) {
 
             try {
                 if (connection != null){
+
                     connection.rollback();
+
                 }
             } catch (SQLException rollbackEx){
                 System.getLogger(this.getClass().getName())
@@ -90,6 +94,8 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
             System.getLogger(this.getClass().getName())
                     .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+
+            this.getErrorList().add("Failed to store product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
 
             return false;
 
@@ -115,15 +121,23 @@ public class ProductDAO implements IDataAccessObject<Product> {
     @Override
     public List<Product> getAll() {
 
-        Connection connection = this.dbConnectable.getConnection();
+        Connection connection = this.databaseConnectionHandler.getConnection();
 
         String sql = "SELECT " +
-                ProductSchema.PK + ", " + ProductSchema.FK_CATEGORY + ", " + ProductSchema.NAME +
-                ", " + ProductSchema.UNITARY_PRICE + ", " + ProductSchema.QUANTITY + ", " + ProductSchema.PHOTO_UID +
-                ", " + ProductSchema.CREATED_AT + ", " + ProductSchema.UPDATED_AT +
+                ProductSchema.TABLE_ID + "." + ProductSchema.PK +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.FK_CATEGORY +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.NAME +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.UNITARY_PRICE +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.QUANTITY +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.PHOTO_UID +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.CREATED_AT +
+                ", " + ProductSchema.TABLE_ID + "." + ProductSchema.UPDATED_AT +
+                ", " + CategorySchema.TABLE_ID + "." + CategorySchema.PK +
+                ", " + CategorySchema.TABLE_ID + "." + CategorySchema.NAME +
                 " FROM " +
-                ProductSchema.TABLE_ID +
-                " GROUP BY " + ProductSchema.PK + ";";
+                ProductSchema.TABLE_ID + " AS " + ProductSchema.TABLE_ID +
+                " INNER JOIN " + CategorySchema.TABLE_ID + " AS  " + CategorySchema.TABLE_ID +
+                " ON " + CategorySchema.TABLE_ID + "." + CategorySchema.PK + " = " + ProductSchema.TABLE_ID + "." + ProductSchema.FK_CATEGORY + ";";
 
         PreparedStatement pstmt = null;
         ResultSet resultSet = null;
@@ -141,14 +155,21 @@ public class ProductDAO implements IDataAccessObject<Product> {
             while (resultSet.next()){
                 Product product = new Product();
 
-                product.setIdProduct(resultSet.getInt(ProductSchema.PK));
-                product.setIdCategory(resultSet.getInt(ProductSchema.FK_CATEGORY));
-                product.setName(resultSet.getString(ProductSchema.NAME));
-                product.setUnitaryPrice(resultSet.getBigDecimal(ProductSchema.UNITARY_PRICE));
-                product.setQuantity(resultSet.getInt(ProductSchema.QUANTITY));
-                product.setImageUid(resultSet.getString(ProductSchema.PHOTO_UID));
-                product.setCreatedAt(LocalDateTime.parse(resultSet.getString(ProductSchema.CREATED_AT)));
-                product.setUpdatedAt(LocalDateTime.parse(resultSet.getString(ProductSchema.UPDATED_AT)));
+                product.setIdProduct(resultSet.getInt(1));
+                product.setIdCategory(resultSet.getInt(2));
+                product.setName(resultSet.getString(3));
+                product.setUnitaryPrice(resultSet.getBigDecimal(4));
+                product.setQuantity(resultSet.getInt(5));
+                product.setImageUid(resultSet.getString(6));
+                product.setCreatedAt(LocalDateTime.parse(resultSet.getString(7)));
+                product.setUpdatedAt(LocalDateTime.parse(resultSet.getString(8)));
+
+                Category category = new Category();
+
+                category.setIdCategory(resultSet.getInt(9));
+                category.setName(resultSet.getString(10));
+
+                product.setCategory(category);
 
                 products.add(product);
             }
@@ -156,7 +177,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
         } catch (SQLException | DateTimeParseException ex){
 
             System.getLogger(this.getClass().getName())
-                .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+                    .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
 
         } finally {
 
@@ -166,7 +187,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
                 if (resultSet != null) { resultSet.close(); }
             } catch (SQLException ex){
                 System.getLogger(this.getClass().getName())
-                    .log(System.Logger.Level.ERROR, ex.getMessage(), ex);
+                        .log(System.Logger.Level.ERROR, ex.getMessage(), ex);
             }
 
         }
@@ -178,14 +199,12 @@ public class ProductDAO implements IDataAccessObject<Product> {
     @Override
     public boolean update(Product validatedProduct) {
 
-        if (this.productImageHandler == null){ return false; }
+        boolean hasImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank() && !validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
 
-        Connection connection = this.dbConnectable.getConnection();
+        Connection connection = this.databaseConnectionHandler.getConnection();
 
-        String sql = "";
-        boolean hasCustomImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank();
-        System.out.println("hasCustomImage? " + (hasCustomImage));
-        if (hasCustomImage){
+        String sql = null;
+        if (hasImage){
             sql = "UPDATE " + ProductSchema.TABLE_ID +
                     " SET" +
                     " " + ProductSchema.FK_CATEGORY + " = ?" +
@@ -203,7 +222,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
                     ", " + ProductSchema.NAME + " = ?" +
                     ", " + ProductSchema.UNITARY_PRICE + " = ?" +
                     ", " + ProductSchema.QUANTITY + " = ?" +
-                    ", " + ProductSchema.PHOTO_UID + " = (default)" +
+                    ", " + ProductSchema.PHOTO_UID + " = " + "\"" + AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME + "\"" +
                     ", " + ProductSchema.UPDATED_AT + " = (strftime('%Y-%m-%dT%H:%M:%S', 'now', 'localtime'))" +
                     " WHERE " +
                     ProductSchema.PK + " = ?;";
@@ -220,7 +239,7 @@ public class ProductDAO implements IDataAccessObject<Product> {
             pstmt.setString(2, validatedProduct.getName());
             pstmt.setBigDecimal(3, validatedProduct.getUnitaryPrice());
             pstmt.setInt(4, validatedProduct.getQuantity());
-            if (hasCustomImage){
+            if (hasImage){
                 pstmt.setString(5, validatedProduct.getImageUid());
                 pstmt.setInt(6, validatedProduct.getIdProduct());
             } else {
@@ -232,17 +251,20 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
             if (!isOperationSuccessful){
                 connection.rollback();
+                this.getErrorList().add("Failed to update product's data. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
                 return false;
             }
 
             connection.commit();
             return true;
 
-        } catch (SQLException ex){
+        } catch (SQLException ex) {
 
             try {
                 if (connection != null){
+
                     connection.rollback();
+
                 }
             } catch (SQLException rollbackEx){
                 System.getLogger(this.getClass().getName())
@@ -251,6 +273,8 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
             System.getLogger(this.getClass().getName())
                     .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+
+            this.getErrorList().add("Failed to update product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
 
             return false;
 
@@ -275,27 +299,11 @@ public class ProductDAO implements IDataAccessObject<Product> {
 
     @Override
     public List<String> getErrorList() {
-        return null;
+        return this.errorList;
     }
 
     @Override
     public void setErrorList(List<String> errorList) {
         this.errorList = errorList;
-    }
-
-    public IDatabaseConnectionHandler getDbConnectable() {
-        return dbConnectable;
-    }
-
-    public void setDbConnectable(IDatabaseConnectionHandler dbConnectable) {
-        this.dbConnectable = dbConnectable;
-    }
-
-    public IImageHandler getProductImageHandler() {
-        return productImageHandler;
-    }
-
-    public void setProductImageHandler(IImageHandler productImageHandler) {
-        this.productImageHandler = productImageHandler;
     }
 }

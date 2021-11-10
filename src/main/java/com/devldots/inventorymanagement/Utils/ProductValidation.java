@@ -1,19 +1,19 @@
 package com.devldots.inventorymanagement.Utils;
 
 import com.devldots.inventorymanagement.Abstracts.AbstractDataEntryValidation;
+import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.DataTransferObjects.ProductDTO;
 import com.devldots.inventorymanagement.Models.Category;
 import com.devldots.inventorymanagement.Models.Product;
+import org.apache.commons.io.FilenameUtils;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, Product> {
 
@@ -26,7 +26,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
     }
 
     @Override
-    public boolean validate(ProductDTO productInput) {
+    public boolean validate(ProductDTO productInput, Product product) {
 
         if (isAnyRequiredFieldEmpty(productInput)){ return false; }
         if (isAnyStringFieldOutOfRange(productInput)){ return false; }
@@ -34,7 +34,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         if (isAnyIntegerFieldInvalid(productInput)){ return false; }
         if (isAnyIdFieldInvalid(productInput)){ return false; }
 
-        this.setValidated(parseInputIntoModel(productInput));
+        this.setValidated(parseInputIntoModel(productInput, product));
         if (this.getValidated() == null){
             this.getErrorList().add("Product data couldn't be validated. Please contact the administrator.");
         }
@@ -144,16 +144,23 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
     }
 
-    private Product parseInputIntoModel(ProductDTO productInput) throws NullPointerException {
+    private Product parseInputIntoModel(ProductDTO productInput, Product productModel) throws NullPointerException {
         if (!this.getErrorList().isEmpty()){ return null; }
 
-        Product validProduct = new Product();
+        Product validProduct = productModel;
 
         validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
 
         validProduct.setName(productInput.getName());
         validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
         validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
+
+        boolean isProductWithImage = validProduct.getImageUid() != null && !validProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
+        boolean isAddingFirstProductImage = !isProductWithImage && (productInput.getImagePath() != null && !productInput.getImagePath().isBlank());
+        if (isAddingFirstProductImage) {
+            String newImageUUID = UUID.randomUUID() + "-" + new Date().getTime() + "." + FilenameUtils.getExtension(productInput.getImagePath());
+            validProduct.setImageUid(newImageUUID);
+        }
 
         Category validProductCategory = new Category();
 
