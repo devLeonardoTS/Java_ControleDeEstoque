@@ -207,7 +207,7 @@ public class InventoryController {
 
     }
 
-    @FXML private void editProduct() {
+    @FXML private void productUpdateHandler() {
 
         String btnValue = this.btnUpdate.getText() != null ? this.btnUpdate.getText() : "" ;
         Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
@@ -483,7 +483,7 @@ public class InventoryController {
         this.tblColProductName.setCellFactory(col -> new TableCellWithTooltip<>());
 
         this.tblColProductUnitaryPrice.setCellValueFactory(new PropertyValueFactory<>("unitaryPrice"));
-        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(new Locale("pt", "BR"), false));
+        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(AppConfig.userLocale, false));
 
         this.tblColProductQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         this.tblColProductQuantity.setCellFactory(col -> new TableCellWithTooltip<>());
@@ -503,7 +503,7 @@ public class InventoryController {
 
         this.txtProductName.setText(product.getName());
 
-        Locale locale = new Locale("pt", "BR");
+        Locale locale = AppConfig.userLocale;
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(locale);
         DecimalFormatSymbols localizedSymbols = new DecimalFormatSymbols(locale);
         df.setDecimalFormatSymbols(localizedSymbols);
@@ -626,8 +626,8 @@ public class InventoryController {
         productData += "• Name: " + validatedProduct.getName() + "\n";
         productData += "• Price: ";
         try {
-            DecimalFormat monetaryFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.getDefault());
-            String monetarySymbol = monetaryFormatter.getCurrency().getSymbol(Locale.getDefault());
+            DecimalFormat monetaryFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance(AppConfig.userLocale);
+            String monetarySymbol = monetaryFormatter.getCurrency().getSymbol(AppConfig.userLocale);
             monetaryFormatter.setNegativePrefix(monetarySymbol + " -");
             monetaryFormatter.setMinimumIntegerDigits(1);
             monetaryFormatter.setMinimumFractionDigits(2);
@@ -640,9 +640,6 @@ public class InventoryController {
 
         productData += "• Quantity: " + validatedProduct.getQuantity() + "\n";
         productData += "• Category: " + validatedProduct.getCategory().getName() + "\n";
-
-        System.out.println(selectedProductImagePath);
-        System.out.println(validatedProduct.getImageUid());
 
         boolean isProductImageUnchanged = validatedProduct.getImageUid() != null && selectedProductImagePath.contains(validatedProduct.getImageUid());
         boolean isProductImageDefault = (validatedProduct.getImageUid() == null || validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME)) && selectedProductImagePath.isBlank();

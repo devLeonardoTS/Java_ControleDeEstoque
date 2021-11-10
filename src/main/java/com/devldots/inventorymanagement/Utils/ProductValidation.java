@@ -91,7 +91,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         List<String> invalidFieldMsgList = new ArrayList<>();
 
-        monetaryValidation("Preço unitário", productInput.getUnitaryPrice(), false, 9, 2, invalidFieldMsgList);
+        monetaryValidation("Preço unitário", productInput.getUnitaryPrice(), false, 9, 2, AppConfig.userLocale, invalidFieldMsgList);
 
         if (!invalidFieldMsgList.isEmpty()){
             for (String invalidFieldMsg : invalidFieldMsgList){
@@ -151,7 +151,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
 
         validProduct.setName(productInput.getName());
-        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
+        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice(), AppConfig.userLocale));
         validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
 
         boolean isProductWithImage = validProduct.getImageUid() != null && !validProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
@@ -256,7 +256,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         }
     }
 
-    private void monetaryValidation(String fieldName, String fieldValue, boolean allowNegative, int maxPrecision, int maxScale, List<String> invalidFieldMsgList){
+    private void monetaryValidation(String fieldName, String fieldValue, boolean allowNegative, int maxPrecision, int maxScale, Locale locale, List<String> invalidFieldMsgList){
 
         if (maxPrecision < maxScale) {
             invalidFieldMsgList.add(fieldName + "'s max precision (" + maxPrecision + ") can't be lower than max scale ("+ maxScale +").");
@@ -319,7 +319,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         try {
 
-            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
+            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
             decimalFormatter.setParseBigDecimal(true);
 
             BigDecimal fieldValueAsBigDecimal = (BigDecimal) decimalFormatter.parseObject(fieldValue);
@@ -338,10 +338,10 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
     }
 
-    private BigDecimal parseLocalMonetaryInputToBigDecimal(String monetaryInput){
+    private BigDecimal parseLocalMonetaryInputToBigDecimal(String monetaryInput, Locale locale){
 
         try {
-            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
+            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
             decimalFormatter.setParseBigDecimal(true);
 
             return (BigDecimal) decimalFormatter.parseObject(monetaryInput);
