@@ -3,7 +3,7 @@ package com.devldots.inventorymanagement.Factory;
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import com.devldots.inventorymanagement.Constants.CategorySchema;
 import com.devldots.inventorymanagement.Constants.ProductSchema;
-import com.devldots.inventorymanagement.Interfaces.IDbConnection;
+import com.devldots.inventorymanagement.Interfaces.IDatabaseConnectionHandler;
 import com.devldots.inventorymanagement.Utils.AppLogger;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -13,7 +13,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.logging.Level;
 
-public class SQLiteConnection implements IDbConnection {
+public class SQLiteConnection implements IDatabaseConnectionHandler {
 
     @Override
     public Connection getConnection() {

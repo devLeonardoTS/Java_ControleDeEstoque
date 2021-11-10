@@ -2,7 +2,7 @@ package com.devldots.inventorymanagement.Interfaces;
 
 import java.util.List;
 
-public interface IDataAccessObject<T> {
+public interface IDataAccessHandler<T> {
 
     boolean save(T object);
 
@@ -10,8 +10,12 @@ public interface IDataAccessObject<T> {
 
     List<T> getAll();
 
-    T update(T object) throws NullPointerException;
+    boolean update(T object);
 
     boolean delete (Object id) throws IllegalArgumentException;
+
+    List<String> getErrorList();
+
+    void setErrorList(List<String> errorList);
 
 }

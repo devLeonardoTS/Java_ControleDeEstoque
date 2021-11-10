@@ -1,7 +1,5 @@
 package com.devldots.inventorymanagement.Models;
 
-import javafx.beans.property.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

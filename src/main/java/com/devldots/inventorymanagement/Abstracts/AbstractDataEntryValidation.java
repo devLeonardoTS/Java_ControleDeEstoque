@@ -11,7 +11,7 @@ public abstract class AbstractDataEntryValidation<TAnyDTO, SAnyModel> {
         setErrorList(errorList);
     }
 
-    public abstract boolean validate(TAnyDTO userInputObject);
+    public abstract boolean validate(TAnyDTO userInputObject, SAnyModel modelObject);
 
     public SAnyModel getValidated() {
         if (!this.getErrorList().isEmpty()){ return null; }

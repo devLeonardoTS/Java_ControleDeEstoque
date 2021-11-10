@@ -1,7 +1,5 @@
 package com.devldots.inventorymanagement.DataTransferObjects;
 
-import com.devldots.inventorymanagement.Models.Category;
-
 public class ProductDTO {
 
     private String idProduct;

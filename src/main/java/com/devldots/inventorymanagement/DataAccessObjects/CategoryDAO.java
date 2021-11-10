@@ -1,8 +1,8 @@
 package com.devldots.inventorymanagement.DataAccessObjects;
 
 import com.devldots.inventorymanagement.Constants.CategorySchema;
-import com.devldots.inventorymanagement.Interfaces.IDataAccessObject;
-import com.devldots.inventorymanagement.Interfaces.IDbConnection;
+import com.devldots.inventorymanagement.Interfaces.IDataAccessHandler;
+import com.devldots.inventorymanagement.Interfaces.IDatabaseConnectionHandler;
 import com.devldots.inventorymanagement.Models.Category;
 
 import java.sql.Connection;
@@ -12,16 +12,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryDAO implements IDataAccessObject<Category> {
+public class CategoryDAO implements IDataAccessHandler<Category> {
 
-    IDbConnection dbConnectable;
+    private IDatabaseConnectionHandler dbConnectable;
+    private List<String> errorList;
 
-    public CategoryDAO(IDbConnection dbConnectable){
+    public CategoryDAO(IDatabaseConnectionHandler dbConnectable){
         this.dbConnectable = dbConnectable;
     }
 
     @Override
-    public boolean save(Category object) {
+    public boolean save(Category validatedCategory) {
+        // Todo: CategoryDAO - save(Category validatedCategory);
         return false;
     }
 
@@ -135,13 +137,25 @@ public class CategoryDAO implements IDataAccessObject<Category> {
     }
 
     @Override
-    public Category update(Category object) throws NullPointerException {
-        return null;
+    public boolean update(Category validatedCategory) {
+        // Todo: CategoryDAO - update(Category validatedCategory);
+        return false;
     }
 
     @Override
     public boolean delete(Object id) throws IllegalArgumentException {
+        // Todo: CategoryDAO - delete(Object id);
         return false;
+    }
+
+    @Override
+    public List<String> getErrorList() {
+        return this.errorList;
+    }
+
+    @Override
+    public void setErrorList(List<String> errorList) {
+        this.errorList = errorList;
     }
 
 }
