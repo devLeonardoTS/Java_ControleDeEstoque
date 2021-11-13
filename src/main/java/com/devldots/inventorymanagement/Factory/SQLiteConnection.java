@@ -85,7 +85,7 @@ public class SQLiteConnection implements IDatabaseConnectionHandler {
             createCategoriesTable(connection);
             createProductsTable(connection);
             insertDefaultCategories(connection);
-            insertTestProducts(connection);
+//            insertTestProducts(connection);
 
             connection.commit();
             connection.setAutoCommit(true);
@@ -142,17 +142,17 @@ public class SQLiteConnection implements IDatabaseConnectionHandler {
         // Todo: When in final stage, remove "insertDefaultCategories()";
     }
 
-    private void insertTestProducts(Connection connection) throws SQLException {
-        String sql = "INSERT INTO " + ProductSchema.TABLE_ID + " \n" +
-                " (id_category, name, unitary_price, quantity) \n" +
-                " VALUES" +
-                " (1, \"Mouse Logitech M90\", 25.50, 10);";
-
-        Statement stm = connection.createStatement();
-        stm.execute(sql);
-        System.out.println("Inserted values into products table");
-
-        // Todo: When in final stage, remove "insertTestProducts()";
-    }
+//    private void insertTestProducts(Connection connection) throws SQLException {
+//        String sql = "INSERT INTO " + ProductSchema.TABLE_ID + " \n" +
+//                " (id_category, name, unitary_price, quantity) \n" +
+//                " VALUES" +
+//                " (1, \"Mouse Logitech M90\", 25.50, 10);";
+//
+//        Statement stm = connection.createStatement();
+//        stm.execute(sql);
+//        System.out.println("Inserted values into products table");
+//
+//        // Todo: When in final stage, remove "insertTestProducts()";
+//    }
 
 }
