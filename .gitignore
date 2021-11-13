@@ -48,3 +48,5 @@ gradle-app.setting
 
 # Application files folder.
 files_storage/
+
+!demo/*
