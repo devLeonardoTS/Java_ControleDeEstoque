@@ -30,7 +30,7 @@ public class SQLiteConnection implements IDatabaseConnectionHandler {
 
             if (connection != null){
 
-                System.out.println("A connection to the database has been established.");
+                // System.out.println("A connection to the database has been established.");
 
                 if (!dbExists){
                     createDbTables(connection);

@@ -75,7 +75,7 @@ public class ProductService {
 
         ProductImageHandler productImageHandler = null;
 
-        boolean hasDefaultImage = validatedProduct.getImageUid() != null && validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
+        boolean hasDefaultImage = validatedProduct.getImageUid() != null && !validatedProduct.getImageUid().isBlank() && validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
         boolean hasNewImage = !hasDefaultImage && selectedProductImagePath != null && !selectedProductImagePath.isBlank() && !selectedProductImagePath.contains(validatedProduct.getImageUid());
 
         if (hasNewImage){
@@ -142,9 +142,38 @@ public class ProductService {
         return true;
     }
 
-    public boolean deleteProduct(int id) {
-        // Todo: ProductService - deleteProduct(int id);
-        return false;
+    public boolean deleteProduct(Product productToRemove) {
+        // Todo: ProductService - deleteProduct(Product productToRemove);
+
+        // [ ] - W.I.P...
+
+        ProductImageHandler productImageHandler = null;
+
+        try {
+            boolean isProductRemoved = this.getProductDao().delete(productToRemove.getIdProduct());
+
+            if (!isProductRemoved) {
+                this.getErrorList().addAll(this.getProductDao().getErrorList());
+                return false;
+            }
+
+        } catch (IllegalArgumentException ex){
+            this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+            return false;
+        }
+
+        boolean hasDefaultImage = productToRemove.getImageUid() != null && !productToRemove.getImageUid().isBlank() && productToRemove.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
+
+        if (!hasDefaultImage){
+            productImageHandler = new ProductImageHandler();
+            boolean isImageRemoved = productImageHandler.removeImage(productToRemove.getImageUid());
+            if (!isImageRemoved){
+                this.getErrorList().addAll(productImageHandler.getErrorList());
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public IDataAccessHandler<Product> getProductDao() {

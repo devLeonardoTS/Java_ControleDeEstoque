@@ -76,6 +76,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             }
 
             connection.commit();
+            connection.setAutoCommit(true);
             return true;
 
         } catch (SQLException ex) {
@@ -256,6 +257,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             }
 
             connection.commit();
+            connection.setAutoCommit(true);
             return true;
 
         } catch (SQLException ex) {
@@ -295,7 +297,58 @@ public class ProductDAO implements IDataAccessHandler<Product> {
     @Override
     public boolean delete(Object id) throws IllegalArgumentException {
         // Todo: ProductDAO - delete(Object id);
-        return false;
+
+        // [ ] - W.I.P...
+
+        if (!(id instanceof Integer)){
+            throw new IllegalArgumentException("Received an ID of type [" + id.getClass().getSimpleName() + "] please provide an Integer.");
+        }
+
+        Connection connection = this.databaseConnectionHandler.getConnection();
+
+        String sql = "DELETE FROM " +
+                ProductSchema.TABLE_ID +
+                " WHERE " + ProductSchema.PK + " = ?;";
+
+        PreparedStatement pstmt = null;
+
+        try {
+            pstmt = connection.prepareStatement(sql);
+
+            pstmt.setInt(1, (Integer) id);
+
+            int affectedRows = pstmt.executeUpdate();
+            boolean isOperationSuccessful = affectedRows > 0;
+
+            if (!isOperationSuccessful){
+                this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
+                return false;
+            }
+
+            return true;
+
+
+        } catch (SQLException ex){
+
+            System.getLogger(this.getClass().getName())
+                .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
+
+            this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+
+            return false;
+
+        } finally {
+
+            try {
+                if (connection != null) { connection.close(); }
+                if (pstmt != null) { pstmt.close(); }
+            } catch (SQLException ex){
+                System.getLogger(this.getClass().getName())
+                    .log(System.Logger.Level.ERROR, ex.getMessage(), ex);
+            }
+
+        }
+
     }
 
     @Override
