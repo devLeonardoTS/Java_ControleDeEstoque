@@ -33,8 +33,8 @@ public class CategoryService {
         return false;
     }
 
-    public boolean deleteCategory(int id) {
-        // Todo: CategoryService - deleteCategory(int id);
+    public boolean deleteCategory(Category categoryToRemove) {
+        // Todo: CategoryService - deleteCategory(Category categoryToRemove);
         return false;
     }
 

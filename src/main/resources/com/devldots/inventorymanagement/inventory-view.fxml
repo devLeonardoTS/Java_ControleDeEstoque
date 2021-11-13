@@ -22,8 +22,8 @@
                         <Button id="btnRegister" fx:id="btnRegister" layoutX="390.0" layoutY="15.0" minHeight="25.0" minWidth="76.0" mnemonicParsing="false" onAction="#productRegistrationHandler" text="Novo Prod." />
                         <Button id="btnUpdate" fx:id="btnUpdate" disable="true" layoutX="396.0" layoutY="71.0" minHeight="25.0" minWidth="63.0" mnemonicParsing="false" onAction="#productUpdateHandler" text="Atualizar" />
                         <Button id="btnCancel" fx:id="btnCancel" disable="true" layoutX="477.0" layoutY="71.0" minHeight="25.0" minWidth="62.0" mnemonicParsing="false" onAction="#cancelProductOperations" text="Cancelar" />
-                        <Button id="btnDelete" fx:id="btnDelete" disable="true" layoutX="400.0" layoutY="127.0" minHeight="25.0" minWidth="55.0" mnemonicParsing="false" text="Deletar" />
-                        <Button id="btnLogout" fx:id="btnLogout" layoutX="481.0" layoutY="127.0" minHeight="25.0" minWidth="54.0" mnemonicParsing="false" onAction="#quickLilTest" text="Logout" />
+                        <Button id="btnDelete" fx:id="btnDelete" disable="true" layoutX="400.0" layoutY="127.0" minHeight="25.0" minWidth="55.0" mnemonicParsing="false" onAction="#productRemovalHandler" text="Deletar" />
+                        <Button id="btnLogout" fx:id="btnLogout" disable="true" layoutX="481.0" layoutY="127.0" minHeight="25.0" minWidth="54.0" mnemonicParsing="false" onAction="#quickLilTest" text="Logout" />
                         <ImageView id="imgvProductImg" fx:id="imgvProductImg" fitHeight="125.0" fitWidth="125.0" layoutX="234.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@/Assets/default_product_img.png" />

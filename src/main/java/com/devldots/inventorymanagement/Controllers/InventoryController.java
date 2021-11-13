@@ -316,7 +316,60 @@ public class InventoryController {
 
     }
 
-    @FXML private void removeProduct() { }
+    @FXML private void productRemovalHandler() {
+
+        Product selectedProduct = this.tblProducts.getSelectionModel().getSelectedItem();
+
+        Platform.runLater(() -> {
+
+            Alert removalConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            removalConfirmationAlert.setTitle("Removal confirmation");
+            removalConfirmationAlert.setContentText("This action is irreversible, are you sure you want to remove \"" + selectedProduct.getName() + "\"?" );
+            boolean isProductDataConfirmedByUser = removalConfirmationAlert.showAndWait().get() == ButtonType.OK;
+            if (!isProductDataConfirmedByUser){ return; }
+
+            Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
+
+            processingAlert.setTitle("Processing...");
+            processingAlert.setHeaderText("Please wait...");
+            processingAlert.setContentText("I'm removing the product's data...");
+            processingAlert.getButtonTypes().clear();
+            processingAlert.show();
+
+            Platform.runLater(() -> {
+
+                ProductService productService = new ProductService(new ProductDAO(new SQLiteConnection()));
+                productService.deleteProduct(selectedProduct);
+
+                processingAlert.setResult(ButtonType.FINISH);
+
+                boolean isProductRemoved = productService.getErrorList().isEmpty();
+                if (!isProductRemoved){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Something went wrong while removing your product");
+                    String errorMsg = "";
+                    for (String error : productService.getErrorList()){
+                        errorMsg += error + "\n";
+                    }
+                    alert.setContentText(errorMsg);
+                    alert.showAndWait();
+                    return;
+                }
+
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success!");
+                successAlert.setHeaderText("Product's data has been successfully removed");
+                successAlert.show();
+
+                this.refreshProductsTable();
+                this.resetControls();
+
+            });
+
+        });
+
+    }
 
     @FXML private void cancelProductOperations() {
         this.resetControls();
