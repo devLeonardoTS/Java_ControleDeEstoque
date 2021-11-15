@@ -95,7 +95,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             System.getLogger(this.getClass().getName())
                     .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
 
-            this.getErrorList().add("Failed to store product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+            this.getErrorList().add("Falha ao armazenar os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
 
             return false;
 
@@ -252,7 +252,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
 
             if (!isOperationSuccessful){
                 connection.rollback();
-                this.getErrorList().add("Failed to update product's data. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
+                this.getErrorList().add("Falha ao atualizar os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
                 return false;
             }
 
@@ -276,7 +276,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             System.getLogger(this.getClass().getName())
                     .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
 
-            this.getErrorList().add("Failed to update product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+            this.getErrorList().add("Falha ao atualizar os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
 
             return false;
 
@@ -296,12 +296,9 @@ public class ProductDAO implements IDataAccessHandler<Product> {
 
     @Override
     public boolean delete(Object id) throws IllegalArgumentException {
-        // Todo: ProductDAO - delete(Object id);
-
-        // [ ] - W.I.P...
 
         if (!(id instanceof Integer)){
-            throw new IllegalArgumentException("Received an ID of type [" + id.getClass().getSimpleName() + "] please provide an Integer.");
+            throw new IllegalArgumentException("Received an ID of type [" + id.getClass().getSimpleName() + "], please provide an Integer.");
         }
 
         Connection connection = this.databaseConnectionHandler.getConnection();
@@ -321,7 +318,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             boolean isOperationSuccessful = affectedRows > 0;
 
             if (!isOperationSuccessful){
-                this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
+                this.getErrorList().add("Falha ao remover os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - Couldn't find a selected product.");
                 return false;
             }
 
@@ -333,7 +330,7 @@ public class ProductDAO implements IDataAccessHandler<Product> {
             System.getLogger(this.getClass().getName())
                 .log(System.Logger.Level.WARNING, ex.getMessage(), ex);
 
-            this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+            this.getErrorList().add("Falha ao remover os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
 
             return false;
 

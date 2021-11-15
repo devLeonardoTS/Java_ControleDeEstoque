@@ -1,16 +1,12 @@
 package com.devldots.inventorymanagement.Components;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 import com.devldots.inventorymanagement.Configs.AppConfig;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.Tooltip;
 

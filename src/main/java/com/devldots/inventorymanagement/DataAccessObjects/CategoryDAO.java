@@ -31,7 +31,7 @@ public class CategoryDAO implements IDataAccessHandler<Category> {
     public Category get(Object id) throws NullPointerException, IllegalArgumentException {
 
         if (!(id instanceof Integer)){
-            throw new IllegalArgumentException("The id sent is of type [" +id.getClass() +"] please provide an Integer.");
+            throw new IllegalArgumentException("Received an ID of type [" +id.getClass() +"], please provide an Integer.");
         }
 
         Connection connection = this.dbConnectable.getConnection();

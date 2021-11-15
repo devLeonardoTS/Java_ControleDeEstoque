@@ -28,7 +28,7 @@ public class ProductImageHandler implements IImageHandler {
     public boolean saveImageToTemp(String selectedImagePath, String imageUid, int maxImageSize) {
 
         if (selectedImagePath == null || selectedImagePath.isBlank()){
-            this.getErrorList().add("Failed to process product's image. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - Received product image's path as null or empty.");
+            this.getErrorList().add("Falha ao processar a imagem do produto. Por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - Received product image's path as null or empty.");
             return false;
         }
 
@@ -36,7 +36,7 @@ public class ProductImageHandler implements IImageHandler {
         try {
             imageFromPathBuffer = ImageIO.read(new File(selectedImagePath));
         } catch (IOException ex){
-            this.getErrorList().add("Couldn't find the image file, are you sure the image still exists?");
+            this.getErrorList().add("Não foi possível encontrar o arquivo da imagem, você tem certeza que o arquivo ainda existe?");
             return false;
         }
 
@@ -45,7 +45,7 @@ public class ProductImageHandler implements IImageHandler {
             try {
                 resizedImageBuffer = Scalr.resize(imageFromPathBuffer, Scalr.Method.ULTRA_QUALITY, maxImageSize);
             } catch (ImagingOpException | IllegalArgumentException ex) {
-                this.getErrorList().add("Failed to process product's image. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+                this.getErrorList().add("Falha ao processar a imagem do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
                 return false;
             }
         }
@@ -57,11 +57,11 @@ public class ProductImageHandler implements IImageHandler {
         try {
             boolean isImageProcessingComplete = ImageIO.write(resizedImageBuffer, FilenameUtils.getExtension(imageUid), resizedImageFile);
             if (!isImageProcessingComplete){
-                this.getErrorList().add("Failed to process product's image. The image format must be one of the following: \".jpg\", \".jpeg\" or \".png\".");
+                this.getErrorList().add("Falha ao processar a imagem do produto. A imagem deve estar em um desses formatos: \".jpg\", \".jpeg\" or \".png\".");
                 return false;
             }
         } catch (IOException ex){
-            this.getErrorList().add("Failed to process product's image. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+            this.getErrorList().add("Falha ao processar a imagem do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
             return false;
         }
 
@@ -96,7 +96,7 @@ public class ProductImageHandler implements IImageHandler {
             try {
                 Files.move(Path.of(temporaryProductImagePath), Path.of(persistedProductImagePath), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException ex){
-                this.getErrorList().add("Failed to persist processed product's image. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+                this.getErrorList().add("Falha ao armazenar a imagem processada do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
                 return false;
             }
         }
@@ -114,7 +114,7 @@ public class ProductImageHandler implements IImageHandler {
         if (imageToRemove.exists()){
             boolean isRemovalSuccessful = imageToRemove.delete();
             if (!isRemovalSuccessful){
-                this.getErrorList().add("Failed to remove the following product image: " + imageUid);
+                this.getErrorList().add("Falha ao remover a seguinte imagem de um produto: " + imageUid);
                 return false;
             }
         }

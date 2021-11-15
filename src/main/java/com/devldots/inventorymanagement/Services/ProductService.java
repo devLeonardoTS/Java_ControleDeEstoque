@@ -52,7 +52,7 @@ public class ProductService {
         if (hasNewImage && isProductDataStored) {
             boolean isImagePersisted = productImageHandler.persistImage(validatedProduct.getImageUid());
             if (!isImagePersisted){
-                this.getErrorList().add("Except for the photo, the product data was added, this usually indicates a problem, please follow the instructions of the message(s) bellow.");
+                this.getErrorList().add("Exceto pela foto, os dados do produto foram gravados, isso geralmente indica um problema, por favor siga as instruções da(s) mensagem(ns) abaixo.");
                 this.getErrorList().addAll(productImageHandler.getErrorList());
                 return false;
             }
@@ -124,7 +124,7 @@ public class ProductService {
         if (hasNewImage) {
             boolean isImagePersisted = productImageHandler.persistImage(validatedProduct.getImageUid());
             if (!isImagePersisted){
-                this.getErrorList().add("Except for the photo, the product data was updated, this usually indicates a problem, please follow the instructions of the message(s) bellow.");
+                this.getErrorList().add("Exceto pela foto, os dados do produto foram atualizados, isso geralmente indica um problema, por favor siga as instruções da(s) mensagem(ns) abaixo.");
                 this.getErrorList().addAll(productImageHandler.getErrorList());
                 return false;
             }
@@ -133,7 +133,7 @@ public class ProductService {
         if (isReturningImageToDefault && productImageUidReference != null){
             productImageHandler.removeImage(productImageUidReference);
             if (!productImageHandler.getErrorList().isEmpty()){
-                this.getErrorList().add("The product data was updated but failed to remove it's image. This usually indicates a problem, please follow the instructions of the message(s) bellow.");
+                this.getErrorList().add("Os dados do produto foram atualizados mas houve uma falha ao remover a foto do produto, isso geralmente indica um problema, por favor siga as instruções da(s) mensagem(ns) abaixo.");
                 this.getErrorList().addAll(productImageHandler.getErrorList());
                 return false;
             }
@@ -158,7 +158,7 @@ public class ProductService {
             }
 
         } catch (IllegalArgumentException ex){
-            this.getErrorList().add("Failed to remove product's data. Please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
+            this.getErrorList().add("Falha ao remover os dados do produto. Por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getMessage());
             return false;
         }
 
