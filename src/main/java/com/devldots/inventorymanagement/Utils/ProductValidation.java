@@ -9,8 +9,6 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
@@ -56,7 +54,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         requiredFieldValidation("Categoria", categoryId, invalidFieldList);
 
         if (!invalidFieldList.isEmpty()) {
-            String errorMessage = "The following fields can't be empty: ";
+            String errorMessage = "Os seguintes campos devem ser preenchidos: ";
             for (String invalidField : invalidFieldList) {
                 errorMessage += invalidField;
             }
@@ -124,13 +122,11 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         List<String> invalidFieldMsgList = new ArrayList<>();
 
-
         try {
             Integer.parseUnsignedInt(productInput.getCategory().getIdCategory());
         } catch (NumberFormatException ex){
-            invalidFieldMsgList.add("The selected categoria is invalid.");
+            invalidFieldMsgList.add("A categoria selecionada é inválida.");
         }
-
 
         if (!invalidFieldMsgList.isEmpty()){
             for (String invalidFieldMsg : invalidFieldMsgList){
@@ -150,9 +146,9 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
 
-        validProduct.setName(productInput.getName());
-        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
-        validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
+        validProduct.setName(productInput.getName().trim());
+        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice().trim()));
+        validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity().trim()));
 
         boolean isProductWithImage = validProduct.getImageUid() != null && !validProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
         boolean isAddingFirstProductImage = !isProductWithImage && (productInput.getImagePath() != null && !productInput.getImagePath().isBlank());
@@ -208,7 +204,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
     private void stringLengthValidation(String fieldName, String fieldValue, int min, int max, List<String> invalidFieldMsgList){
 
         if (fieldValue.length() < min || fieldValue.length() > max){
-            invalidFieldMsgList.add("\"" + fieldName + "\" needs to be between " + min + " and " + max + " characters.");
+            invalidFieldMsgList.add("\"" + fieldName + "\" deve possuir entre " + min + " e " + max + " caracteres.");
         }
 
     }
@@ -218,7 +214,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             try {
                 Integer.parseInt(fieldValue);
             } catch (NumberFormatException ex){
-                invalidFieldMsgList.add("" + fieldName + "'s value must be an integer number.");
+                invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro.");
             }
         }
 
@@ -226,7 +222,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             try {
                 Integer.parseUnsignedInt(fieldValue);
             } catch (NumberFormatException ex){
-                invalidFieldMsgList.add(fieldName + "'s value must be a positive integer number.");
+                invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro positivo.");
             }
         }
     }
@@ -237,10 +233,10 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             try {
                 int value = Integer.parseInt(fieldValue);
                 if (value < min || value > max) {
-                    invalidFieldMsgList.add(fieldName + "'s value needs to be an integer number between " + min + " and " + max + ".");
+                    invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro de no mínimo " + min + " e no máximo " + max + ".");
                 }
             } catch (NumberFormatException ex){
-                invalidFieldMsgList.add(fieldName + "'s value must be an integer number.");
+                invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro.");
             }
         }
 
@@ -248,32 +244,28 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             try {
                 int value = Integer.parseUnsignedInt(fieldValue);
                 if (value < min || value > max) {
-                    invalidFieldMsgList.add(fieldName + "'s value needs to be a positive integer number between " + min + " and " + max + ".");
+                    invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro positivo de no mínimo " + min + " e no máximo " + max + ".");
                 }
             } catch (NumberFormatException ex){
-                invalidFieldMsgList.add(fieldName + "'s value must be a positive integer number.");
+                invalidFieldMsgList.add("O valor de " + fieldName + " deve ser um número inteiro positivo.");
             }
         }
     }
 
     private void monetaryValidation(String fieldName, String fieldValue, boolean allowNegative, boolean allowZero, int maxPrecision, int maxScale, List<String> invalidFieldMsgList){
 
-        if (!allowZero && fieldValue.equals("0")){
-            invalidFieldMsgList.add(fieldName + "'s value can't be zero.");
-        }
-
         if (maxPrecision < maxScale) {
-            invalidFieldMsgList.add(fieldName + "'s max precision (" + maxPrecision + ") can't be lower than max scale ("+ maxScale +").");
+            invalidFieldMsgList.add("A precisão máxima (" + maxPrecision + ") para o campo " + fieldName + " não pode ser menor que a escala máxima definida (" + maxScale + ").");
             return;
         }
 
         if (fieldValue.matches("(.*)([^0-9,.+-])(.*)")){
-            invalidFieldMsgList.add(fieldName + "'s input don't accept literal characters.");
+            invalidFieldMsgList.add("O campo " + fieldName + " não aceita caracteres literais.");
             return;
         }
 
         if (fieldValue.matches("(.*)([.]{2,}|[,]{2,}|[.],|,[.]|\\s+)(.*)")){
-            invalidFieldMsgList.add(fieldName + "'s input doesn't look right, check for typos or white spaces.");
+            invalidFieldMsgList.add(fieldName + " parece conter valores inesperados, verifique por erros de digitação ou espaços em branco.");
             return;
         }
 
@@ -282,7 +274,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         boolean valueHasDecimalPart = fieldValue.contains(decimalSeparator);
 
         if (!allowNegative && fieldValue.contains("-")){
-            invalidFieldMsgList.add(fieldName + " needs to be a positive value.");
+            invalidFieldMsgList.add(fieldName + " precisa conter um valor positivo.");
             return;
         }
 
@@ -292,12 +284,12 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
                 String decimalPart = (String) fieldValue.subSequence(fieldValue.lastIndexOf(decimalSeparator) + 1, fieldValue.length());
                 boolean decimalPartBeyondMaxScale = decimalPart.length() > maxScale;
                 if (decimalPartBeyondMaxScale) {
-                    invalidFieldMsgList.add(fieldName + " has more decimal values than it should. Max scale is (" + maxScale + ").");
+                    invalidFieldMsgList.add(fieldName + " possui mais números na parte decimal do que deveria. A escala máxima é (" + maxScale + ").");
                     return;
                 }
 
             } catch (IndexOutOfBoundsException ex){
-                invalidFieldMsgList.add(fieldName + " couldn't be verified, please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+                invalidFieldMsgList.add(fieldName + " não pôde ser verificado, por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
                 return;
             }
         }
@@ -312,7 +304,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             for (int i = 0; i < integerGroup.length; i++){
                 boolean isInputOverflowingIntegerGroup = i > 0 && integerGroup[i].length() != 3;
                 if (isInputOverflowingIntegerGroup){
-                    invalidFieldMsgList.add(fieldName + "'s input doesn't look right, check if your thousand separators are being overflown.");
+                    invalidFieldMsgList.add(fieldName + " parece conter valores inesperados, verifique se os números estão sendo separados em milhares e a separação está correta (Ex: 1.000.000,00).");
                     return;
                 }
             }
@@ -326,12 +318,16 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             BigDecimal fieldValueAsBigDecimal = (BigDecimal) df.parseObject(fieldValue);
 
             if (fieldValueAsBigDecimal.precision() > maxPrecision){
-                invalidFieldMsgList.add(fieldName + "'s precision (" + fieldValueAsBigDecimal.precision() + ") is beyond desired precision (" + maxPrecision + "), please contact the administrator.");
+                invalidFieldMsgList.add("O valor de " + fieldName + " deve conter no máximo " + maxPrecision + " dígitos ao total.");
                 return;
             }
 
+            if (!allowZero && fieldValueAsBigDecimal.doubleValue() == 0) {
+                invalidFieldMsgList.add("O valor de " + fieldName + " não pode ser zero.");
+            }
+
         } catch (ParseException ex) {
-            invalidFieldMsgList.add(fieldName + " couldn't be verified, please contact the administrator with the following message: " + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+            invalidFieldMsgList.add(fieldName + " não pôde ser verificado, por favor entre em contato com o administrador com a seguinte mensagem: " + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
             return;
         }
 
@@ -350,4 +346,5 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         }
 
     }
+
 }

@@ -59,9 +59,9 @@ public class SQLiteConnection implements IDatabaseConnectionHandler {
                 Platform.runLater(() -> {
 
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Attention!");
-                    alert.setHeaderText("Attention!");
-                    alert.setContentText("Couldn't access the database, closing the application. Please send the latest log file to the administrator.");
+                    alert.setTitle("Atenção!");
+                    alert.setHeaderText("Atenção!");
+                    alert.setContentText("Não foi possível acessar o banco de dados, fechando a aplicação. Por favor envie o último arquivo de \"log\" para o administrador.");
                     alert.getButtonTypes().clear();
                     alert.getButtonTypes().add(ButtonType.OK);
                     alert.showAndWait();
@@ -137,7 +137,6 @@ public class SQLiteConnection implements IDatabaseConnectionHandler {
 
         Statement stm = connection.createStatement();
         stm.execute(sql);
-        System.out.println("Inserted values into categories table");
 
         // Todo: When in final stage, remove "insertDefaultCategories()";
     }

@@ -33,14 +33,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 public class InventoryController {
 
@@ -98,20 +94,6 @@ public class InventoryController {
     @FXML private void quickLilTest() {
         // this.resetProductImg();
 
-//        ProductDTO productInput = this.getProductInputData();
-//
-//        DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
-//
-//        System.out.println("defLocale: " + Locale.getDefault().toLanguageTag());
-//
-//        try {
-//            System.out.println("input: " + productInput.getUnitaryPrice());
-//            System.out.println("Nf parsed: " + df.parse(productInput.getUnitaryPrice()));
-//            System.out.println("Parsed back: " + df.format(df.parse(productInput.getUnitaryPrice())));
-//        } catch (ParseException ex){
-//            System.out.println("Failed to parse: " + ex.getMessage());
-//        }
-
     }
 
     @FXML private void productRegistrationHandler() {
@@ -136,8 +118,8 @@ public class InventoryController {
                 boolean isProductValidated = productValidator.getErrorList().isEmpty();
                 if (!isProductValidated){
                     Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Attention");
-                    alert.setHeaderText("Couldn't register your product");
+                    alert.setTitle("Atenção");
+                    alert.setHeaderText("Não foi possível cadastrar o seu produto.");
                     String errorMsg = "";
                     for (String error : productValidator.getErrorList()){
                         errorMsg += error + "\n";
@@ -158,24 +140,24 @@ public class InventoryController {
                     }
 
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                    errorAlert.setTitle("Ops! Something went wrong");
-                    errorAlert.setHeaderText("Please contact the administrator");
+                    errorAlert.setTitle("Ops! Uma falha aconteceu");
+                    errorAlert.setHeaderText("Por favor entre em contato com o administrador.");
                     errorAlert.setContentText(errorMsg);
                     errorAlert.showAndWait();
                     return;
 
                 }
                 Alert entryConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                entryConfirmationAlert.setTitle("Confirm this product's entry");
+                entryConfirmationAlert.setTitle("Confirmação de dados do produto");
                 entryConfirmationAlert.setContentText(verifiableProductData);
                 boolean isProductDataConfirmedByUser = entryConfirmationAlert.showAndWait().get() == ButtonType.OK;
                 if (!isProductDataConfirmedByUser){ return; }
 
                 Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
 
-                processingAlert.setTitle("Processing...");
-                processingAlert.setHeaderText("Please wait...");
-                processingAlert.setContentText("I'm storing the product's data...");
+                processingAlert.setTitle("Processando...");
+                processingAlert.setHeaderText("Por favor aguarde...");
+                processingAlert.setContentText("Estou armazenando os dados do produto...");
                 processingAlert.getButtonTypes().clear();
                 processingAlert.show();
 
@@ -195,8 +177,8 @@ public class InventoryController {
                     if (!isProductStored){
 
                         Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Error");
-                        alert.setHeaderText("Something went wrong while registering your product");
+                        alert.setTitle("Uma falha aconteceu");
+                        alert.setHeaderText("Algo deu errado ao registar os dados do produto.");
                         String errorMsg = "";
                         for (String error : productService.getErrorList()){
                             errorMsg += error + "\n";
@@ -207,8 +189,8 @@ public class InventoryController {
                     }
 
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Success!");
-                    successAlert.setHeaderText("Product's data has been successfully stored");
+                    successAlert.setTitle("Sucesso!");
+                    successAlert.setHeaderText("Os dados do produto foram cadastrados com sucesso!");
                     successAlert.show();
 
                     this.refreshProductsTable();
@@ -245,8 +227,8 @@ public class InventoryController {
                 boolean isProductValidated = productValidator.getErrorList().isEmpty();
                 if (!isProductValidated){
                     Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Attention");
-                    alert.setHeaderText("Couldn't update the product's data");
+                    alert.setTitle("Atenção");
+                    alert.setHeaderText("Não foi possível atualizar os dados do produto.");
                     String errorMsg = "";
                     for (String error : productValidator.getErrorList()){
                         errorMsg += error + "\n";
@@ -267,24 +249,24 @@ public class InventoryController {
                     }
 
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                    errorAlert.setTitle("Ops! Something went wrong");
-                    errorAlert.setHeaderText("Please contact the administrator");
+                    errorAlert.setTitle("Ops! Uma falha aconteceu");
+                    errorAlert.setHeaderText("Por favor entre em contato com o administrador");
                     errorAlert.setContentText(errorMsg);
                     errorAlert.showAndWait();
                     return;
 
                 }
                 Alert entryConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                entryConfirmationAlert.setTitle("Confirm this product's entry");
+                entryConfirmationAlert.setTitle("Confirmação de dados do produto");
                 entryConfirmationAlert.setContentText(verifiableProductData);
                 boolean isProductDataConfirmedByUser = entryConfirmationAlert.showAndWait().get() == ButtonType.OK;
                 if (!isProductDataConfirmedByUser){ return; }
 
                 Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
 
-                processingAlert.setTitle("Processing...");
-                processingAlert.setHeaderText("Please wait...");
-                processingAlert.setContentText("I'm updating the product's data...");
+                processingAlert.setTitle("Processando...");
+                processingAlert.setHeaderText("Por favor aguarde...");
+                processingAlert.setContentText("Estou atualizando os dados do produto...");
                 processingAlert.getButtonTypes().clear();
                 processingAlert.show();
 
@@ -304,8 +286,8 @@ public class InventoryController {
                     if (!isProductStored){
 
                         Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Error");
-                        alert.setHeaderText("Something went wrong while updating your product");
+                        alert.setTitle("Uma falha aconteceu");
+                        alert.setHeaderText("Algo deu errado ao atualizar os dados do produto.");
                         String errorMsg = "";
                         for (String error : productService.getErrorList()){
                             errorMsg += error + "\n";
@@ -316,8 +298,8 @@ public class InventoryController {
                     }
 
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Success!");
-                    successAlert.setHeaderText("Product's data has been successfully updated");
+                    successAlert.setTitle("Sucesso!");
+                    successAlert.setHeaderText("Os dados do produto foram atualizados com sucesso!");
                     successAlert.show();
 
                     this.refreshProductsTable();
@@ -338,16 +320,16 @@ public class InventoryController {
         Platform.runLater(() -> {
 
             Alert removalConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            removalConfirmationAlert.setTitle("Removal confirmation");
-            removalConfirmationAlert.setContentText("This action is irreversible, are you sure you want to remove \"" + selectedProduct.getName() + "\"?" );
+            removalConfirmationAlert.setTitle("Confirme a remoção");
+            removalConfirmationAlert.setContentText("Essa ação é irreversível, tem certeza de que deseja remover os dados do produto \"" + selectedProduct.getName() + "\"?" );
             boolean isProductDataConfirmedByUser = removalConfirmationAlert.showAndWait().get() == ButtonType.OK;
             if (!isProductDataConfirmedByUser){ return; }
 
             Alert processingAlert = new Alert(Alert.AlertType.INFORMATION);
 
-            processingAlert.setTitle("Processing...");
-            processingAlert.setHeaderText("Please wait...");
-            processingAlert.setContentText("I'm removing the product's data...");
+            processingAlert.setTitle("Processando...");
+            processingAlert.setHeaderText("Por favor aguarde...");
+            processingAlert.setContentText("Estou removendo os dados do produto...");
             processingAlert.getButtonTypes().clear();
             processingAlert.show();
 
@@ -361,8 +343,8 @@ public class InventoryController {
                 boolean isProductRemoved = productService.getErrorList().isEmpty();
                 if (!isProductRemoved){
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Something went wrong while removing your product");
+                    alert.setTitle("Uma falha aconteceu");
+                    alert.setHeaderText("Algo deu errado ao remover os dados do produto.");
                     String errorMsg = "";
                     for (String error : productService.getErrorList()){
                         errorMsg += error + "\n";
@@ -373,8 +355,8 @@ public class InventoryController {
                 }
 
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setTitle("Success!");
-                successAlert.setHeaderText("Product's data has been successfully removed");
+                successAlert.setTitle("Sucesso!");
+                successAlert.setHeaderText("Os dados do produto foram removidos com sucesso.");
                 successAlert.show();
 
                 this.refreshProductsTable();
@@ -688,24 +670,24 @@ public class InventoryController {
 
         String productData = "";
 
-        productData += "• Name: " + validatedProduct.getName() + "\n";
-        productData += "• Price: ";
+        productData += "• Nome: " + validatedProduct.getName() + "\n";
+        productData += "• Preço Un.: ";
         try {
             DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
 
             productData += df.format(validatedProduct.getUnitaryPrice()) + "\n";
         } catch (Exception ex){
-            errorMsgList.add("Failed to display product entry data and confirmation. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+            errorMsgList.add("Falha ao exibir os dados de entrada e confirmação do produto. Por favor entre em contato com o administrador com a seguinte mensagem: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
         }
 
-        productData += "• Quantity: " + validatedProduct.getQuantity() + "\n";
-        productData += "• Category: " + validatedProduct.getCategory().getName() + "\n";
+        productData += "• Quantidade: " + validatedProduct.getQuantity() + "\n";
+        productData += "• Categoria: " + validatedProduct.getCategory().getName() + "\n";
 
         boolean isProductImageUnchanged = validatedProduct.getImageUid() != null && selectedProductImagePath.contains(validatedProduct.getImageUid());
         boolean isProductImageDefault = (validatedProduct.getImageUid() == null || validatedProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME)) && selectedProductImagePath.isBlank();
         boolean hasNewImage = !isProductImageUnchanged && !isProductImageDefault;
 
-        productData += "• Has new image? " + (hasNewImage ? "Yes" : "No") + "\n";
+        productData += "• Mudou a imagem? " + (hasNewImage ? "Sim" : "Não") + "\n";
 
         return productData;
     }
