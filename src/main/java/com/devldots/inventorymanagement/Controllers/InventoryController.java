@@ -35,6 +35,7 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,6 +97,20 @@ public class InventoryController {
 
     @FXML private void quickLilTest() {
         // this.resetProductImg();
+
+//        ProductDTO productInput = this.getProductInputData();
+//
+//        DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
+//
+//        System.out.println("defLocale: " + Locale.getDefault().toLanguageTag());
+//
+//        try {
+//            System.out.println("input: " + productInput.getUnitaryPrice());
+//            System.out.println("Nf parsed: " + df.parse(productInput.getUnitaryPrice()));
+//            System.out.println("Parsed back: " + df.format(df.parse(productInput.getUnitaryPrice())));
+//        } catch (ParseException ex){
+//            System.out.println("Failed to parse: " + ex.getMessage());
+//        }
 
     }
 
@@ -536,7 +551,7 @@ public class InventoryController {
         this.tblColProductName.setCellFactory(col -> new TableCellWithTooltip<>());
 
         this.tblColProductUnitaryPrice.setCellValueFactory(new PropertyValueFactory<>("unitaryPrice"));
-        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(AppConfig.userLocale, false));
+        this.tblColProductUnitaryPrice.setCellFactory(col -> new TableCellWithMonetaryFormat<>(false));
 
         this.tblColProductQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         this.tblColProductQuantity.setCellFactory(col -> new TableCellWithTooltip<>());
@@ -556,13 +571,9 @@ public class InventoryController {
 
         this.txtProductName.setText(product.getName());
 
-        Locale locale = AppConfig.userLocale;
-        DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(locale);
-        DecimalFormatSymbols localizedSymbols = new DecimalFormatSymbols(locale);
-        df.setDecimalFormatSymbols(localizedSymbols);
-        df.setMinimumIntegerDigits(1);
-        df.setMinimumFractionDigits(2);
-        this.txtProductUnitaryPrice.setText( df.format(product.getUnitaryPrice() ) );
+        DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
+
+        this.txtProductUnitaryPrice.setText(df.format(product.getUnitaryPrice()));
 
         this.txtProductQuantity.setText(Integer.toString(product.getQuantity()));
 
@@ -613,6 +624,7 @@ public class InventoryController {
             double ratioY = imageView.getFitHeight() / img.getHeight();
 
             double reducCoeff = 0;
+
             if (ratioX >= ratioY){
                 reducCoeff = ratioY;
             } else {
@@ -679,14 +691,9 @@ public class InventoryController {
         productData += "• Name: " + validatedProduct.getName() + "\n";
         productData += "• Price: ";
         try {
-            DecimalFormat monetaryFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance(AppConfig.userLocale);
-            String monetarySymbol = monetaryFormatter.getCurrency().getSymbol(AppConfig.userLocale);
-            monetaryFormatter.setNegativePrefix(monetarySymbol + " -");
-            monetaryFormatter.setMinimumIntegerDigits(1);
-            monetaryFormatter.setMinimumFractionDigits(2);
-            monetaryFormatter.setMaximumFractionDigits(2);
+            DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
 
-            productData += monetaryFormatter.format(validatedProduct.getUnitaryPrice()) + "\n";
+            productData += df.format(validatedProduct.getUnitaryPrice()) + "\n";
         } catch (Exception ex){
             errorMsgList.add("Failed to display product entry data and confirmation. Please contact the administrator with the following message: "  + this.getClass().getSimpleName() + " - " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
         }

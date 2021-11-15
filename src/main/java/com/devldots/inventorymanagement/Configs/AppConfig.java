@@ -5,6 +5,8 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public final class AppConfig {
@@ -23,7 +25,26 @@ public final class AppConfig {
 
     public final static String DEFAULT_DB_PATH = Path.of(WORKING_DIR, "database.db").toString();
 
-    public final static Locale userLocale = new Locale("pt", "BR");
+    // public final static Locale userLocale = new Locale("pt", "BR");
+
+    public static DecimalFormat getBrazilMonetaryDecimalFormatter(){
+
+        Locale locale = new Locale("pt", "BR");
+
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols(locale);
+        dfs.setGroupingSeparator('.');
+        dfs.setDecimalSeparator(',');
+
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        df.setNegativePrefix("R$ -");
+        df.setParseBigDecimal(true);
+        df.setDecimalFormatSymbols(dfs);
+        df.setMinimumIntegerDigits(1);
+        df.setMinimumFractionDigits(2);
+        df.setMaximumFractionDigits(2);
+
+        return df;
+    }
 
     public static void createFileDirectories() {
 
