@@ -91,7 +91,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         List<String> invalidFieldMsgList = new ArrayList<>();
 
-        monetaryValidation("Preço unitário", productInput.getUnitaryPrice(), false, 9, 2, AppConfig.userLocale, invalidFieldMsgList);
+        monetaryValidation("Preço unitário", productInput.getUnitaryPrice(), false, false, 9, 2, invalidFieldMsgList);
 
         if (!invalidFieldMsgList.isEmpty()){
             for (String invalidFieldMsg : invalidFieldMsgList){
@@ -151,7 +151,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         validProduct.setIdCategory(Integer.parseUnsignedInt(productInput.getCategory().getIdCategory()));
 
         validProduct.setName(productInput.getName());
-        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice(), AppConfig.userLocale));
+        validProduct.setUnitaryPrice(parseLocalMonetaryInputToBigDecimal(productInput.getUnitaryPrice()));
         validProduct.setQuantity(Integer.parseUnsignedInt(productInput.getQuantity()));
 
         boolean isProductWithImage = validProduct.getImageUid() != null && !validProduct.getImageUid().equals(AppConfig.DEFAULT_PRODUCT_IMG_FILE_NAME);
@@ -256,7 +256,11 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
         }
     }
 
-    private void monetaryValidation(String fieldName, String fieldValue, boolean allowNegative, int maxPrecision, int maxScale, Locale locale, List<String> invalidFieldMsgList){
+    private void monetaryValidation(String fieldName, String fieldValue, boolean allowNegative, boolean allowZero, int maxPrecision, int maxScale, List<String> invalidFieldMsgList){
+
+        if (!allowZero && fieldValue.equals("0")){
+            invalidFieldMsgList.add(fieldName + "'s value can't be zero.");
+        }
 
         if (maxPrecision < maxScale) {
             invalidFieldMsgList.add(fieldName + "'s max precision (" + maxPrecision + ") can't be lower than max scale ("+ maxScale +").");
@@ -273,9 +277,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             return;
         }
 
-        DecimalFormatSymbols localeDecimalFormatSymbols = DecimalFormatSymbols.getInstance();
-
-        String decimalSeparator = Character.toString(localeDecimalFormatSymbols.getDecimalSeparator());
+        String decimalSeparator = ",";
 
         boolean valueHasDecimalPart = fieldValue.contains(decimalSeparator);
 
@@ -300,7 +302,7 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
             }
         }
 
-        String thousandSeparator = Character.toString(localeDecimalFormatSymbols.getGroupingSeparator());
+        String thousandSeparator = ".";
 
         if (fieldValue.contains(thousandSeparator)){
 
@@ -319,10 +321,9 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
         try {
 
-            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-            decimalFormatter.setParseBigDecimal(true);
+            DecimalFormat df = AppConfig.getBrazilMonetaryDecimalFormatter();
 
-            BigDecimal fieldValueAsBigDecimal = (BigDecimal) decimalFormatter.parseObject(fieldValue);
+            BigDecimal fieldValueAsBigDecimal = (BigDecimal) df.parseObject(fieldValue);
 
             if (fieldValueAsBigDecimal.precision() > maxPrecision){
                 invalidFieldMsgList.add(fieldName + "'s precision (" + fieldValueAsBigDecimal.precision() + ") is beyond desired precision (" + maxPrecision + "), please contact the administrator.");
@@ -338,11 +339,10 @@ public class ProductValidation extends AbstractDataEntryValidation<ProductDTO, P
 
     }
 
-    private BigDecimal parseLocalMonetaryInputToBigDecimal(String monetaryInput, Locale locale){
+    private BigDecimal parseLocalMonetaryInputToBigDecimal(String monetaryInput){
 
         try {
-            DecimalFormat decimalFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-            decimalFormatter.setParseBigDecimal(true);
+            DecimalFormat decimalFormatter = AppConfig.getBrazilMonetaryDecimalFormatter();
 
             return (BigDecimal) decimalFormatter.parseObject(monetaryInput);
         } catch (ParseException ex) {
